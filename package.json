@@ -1,0 +1,30 @@
+{
+  "name": "Git CSV Diff",
+  "author": "Valor-Software",
+  "version": "1.0.0",
+  "license": "GPL-3.0",
+  "description": "Library generate difference between csv-files based on Git commit hash",
+  "contributors": [
+    {
+      "name": "Vyacheslav Panchenko",
+      "email": "vyacheslav.panchenko@valor-software.com"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/Gapminder/git-csv-diff/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gapminder/git-csv-diff.git"
+  },
+  "main": "index.js",
+  "homepage": "https://github.com/Gapminder/git-csv-diff#readme",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "async": "2.1.2",
+    "daff": "1.3.18",
+    "simple-git": "1.57.0"
+  }
+}
