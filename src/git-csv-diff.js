@@ -2,6 +2,7 @@
 
 const daff = require('daff');
 const fs = require('fs');
+const path = require('path');
 const async = require("async");
 const gitFlow = require('./git-flow');
 
@@ -10,12 +11,14 @@ function gitCsvDiff () {};
 
 gitCsvDiff.prototype.process = function (data, callback) {
 
-  let sourceFolderPath = data.sourceFolder;
+  const sourceFolderPath = path.resolve(data.sourceFolder) + "/";
+  const resultToFile = data.resultToFile ? true : false;
+  const translations = data.translations ? true : false;
 
   let dataRequest = {};
   let gitDiffFileStatus = {};
 
-  gitFlow.setSourceFolder(data.sourceFolder);
+  gitFlow.setSourceFolder(sourceFolderPath);
   gitFlow.getFileDiffByHashes(data, gitDiffFileStatus, function(error, gitDiffFileList) {
 
     if(!!error) {
@@ -41,13 +44,23 @@ gitCsvDiff.prototype.process = function (data, callback) {
       // callback
       function(error){
 
+        if(!!error) {
+          return callback(error);
+        }
+
         let result = {
           'files': gitDiffFileStatus,
           'changes': dataRequest
         };
 
-        let resultFileName = sourceFolderPath + "diff-operation-result.json";
-        //fs.writeFileSync(resultFileName, JSON.stringify(result));
+        if(translations) {
+          generateTranslations(result);
+        }
+
+        if(resultToFile) {
+          const resultFileName = sourceFolderPath + "diff-operation-result.json";
+          fs.writeFileSync(resultFileName, JSON.stringify(result));
+        }
 
         //console.log("* Diff generation completed!");
         return callback(false, result);
@@ -367,6 +380,27 @@ gitCsvDiff.prototype.process = function (data, callback) {
     //fs.writeFileSync(sourceFolderPath + fileName + ".json", JSON.stringify(fileDiffData));
   };
 
+  function generateTranslations(resultDiff) {
+    if(!resultDiff.files) {
+      return;
+    }
+
+    for(let file in resultDiff.files) {
+      if (!resultDiff.files.hasOwnProperty(file)) {
+        continue;
+      }
+
+      if(isTranslationFile(file)) {
+
+      }
+    }
+  };
+
+  function isTranslationFile(fileName) {
+    const regexpRule = /^ddf--translation--(([\w]{2,}-[\w]{2,})|([\w]{2,}))--/;
+    const regexpMatch = regexpRule.exec(fileName);
+    console.log("regexpMatch", regexpMatch);
+  };
 };
 
 module.exports = new gitCsvDiff();

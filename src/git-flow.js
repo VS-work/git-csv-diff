@@ -5,7 +5,7 @@ const path = require('path');
 const async = require("async");
 
 const simpleGit = require('simple-git')();
-simpleGit.silent(true);
+//simpleGit.silent(false);
 
 function gitFlow () {};
 
@@ -65,6 +65,7 @@ gitFlow.prototype.registerRepo = function (github, callback) {
 
         return callback();
       });
+
     });
   });
 };
