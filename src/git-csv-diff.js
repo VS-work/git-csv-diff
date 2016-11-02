@@ -1,13 +1,34 @@
 'use strict';
 
 const daff = require('daff');
+const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
 const async = require("async");
 const gitFlow = require('./git-flow');
 
+const DIFF_STRUCTURE = {
+  header: {
+    create: [],
+    remove: [],
+    update: []
+  },
+  body: {
+    create: [],
+    remove: [],
+    update: [],
+    change: [],
 
-function gitCsvDiff () {};
+    translate: {
+      create: [],
+      remove: [],
+      update: [],
+      change: []
+    }
+  }
+};
+
+function gitCsvDiff() {};
 
 gitCsvDiff.prototype.process = function (data, callback) {
 
@@ -19,21 +40,20 @@ gitCsvDiff.prototype.process = function (data, callback) {
   let gitDiffFileStatus = {};
 
   gitFlow.setSourceFolder(sourceFolderPath);
-  gitFlow.getFileDiffByHashes(data, gitDiffFileStatus, function(error, gitDiffFileList) {
+  gitFlow.getFileDiffByHashes(data, gitDiffFileStatus, function (error, gitDiffFileList) {
 
-    if(!!error) {
+    if (!!error) {
       return callback(error);
     }
 
-    async.mapSeries (
-
+    async.mapSeries(
       gitDiffFileList,
       // iteration
-      function(fileName, doneMapLimit){
+      function (fileName, doneMapLimit) {
 
         //console.log("generate diff for file: ", fileName);
 
-        gitFlow.showFileStateByHash(data, fileName, function(error, result) {
+        gitFlow.showFileStateByHash(data, fileName, function (error, result) {
 
           getDiffByFile(fileName, result);
           return doneMapLimit(error);
@@ -42,9 +62,9 @@ gitCsvDiff.prototype.process = function (data, callback) {
 
       },
       // callback
-      function(error){
+      function (error) {
 
-        if(!!error) {
+        if (!!error) {
           return callback(error);
         }
 
@@ -53,11 +73,11 @@ gitCsvDiff.prototype.process = function (data, callback) {
           'changes': dataRequest
         };
 
-        if(translations) {
+        if (translations) {
           generateTranslations(result);
         }
 
-        if(resultToFile) {
+        if (resultToFile) {
           const resultFileName = sourceFolderPath + "diff-operation-result.json";
           fs.writeFileSync(resultFileName, JSON.stringify(result));
         }
@@ -69,14 +89,14 @@ gitCsvDiff.prototype.process = function (data, callback) {
 
   });
 
-  function getDiffByFile (fileName, dataDiff) {
+  function getDiffByFile(fileName, dataDiff) {
 
     let diffResult = [];
 
     const tableFrom = new daff.Csv().makeTable(dataDiff.from);
     const tableTo = new daff.Csv().makeTable(dataDiff.to);
 
-    let filesDiff = daff.compareTables(tableFrom,tableTo).align();
+    let filesDiff = daff.compareTables(tableFrom, tableTo).align();
 
     let flags = new daff.CompareFlags();
     flags.show_unchanged = true;
@@ -90,25 +110,7 @@ gitCsvDiff.prototype.process = function (data, callback) {
     //fs.writeFileSync(fileDiffJSON, JSON.stringify(diffResult));
 
     /* Prepare Data Structure */
-
-    let fileDiffData = {
-
-      "header": {
-        "create": [],
-        "remove": [],
-        "update": []
-      },
-
-      "body": {
-        "create": [],
-        "remove": [],
-        "update": [],
-        "change": []
-      }
-
-    };
-
-
+    let fileDiffData = _.cloneDeep(DIFF_STRUCTURE);
 
     /* Slice Groupd of Changes */
 
@@ -116,19 +118,19 @@ gitCsvDiff.prototype.process = function (data, callback) {
     let diffResultHeader = [];
     let diffResultColumns = [];
 
-    if(firsDiffRow[0] == '!') {
+    if (firsDiffRow[0] == '!') {
 
       // [ '!', '', '(old_column)', '+++', '---' ],
       diffResultHeader = firsDiffRow;
       // [ '@@', 'city', 'name', 'country' ],
       diffResultColumns = diffResult.shift();
 
-      if(diffResultHeader[0] == "!") {
+      if (diffResultHeader[0] == "!") {
 
         diffResultHeader.shift();
-        diffResultHeader.forEach(function(value, index){
+        diffResultHeader.forEach(function (value, index) {
 
-          if(value != '') {
+          if (value != '') {
 
             if (value == '+++') {
               // added
@@ -155,35 +157,35 @@ gitCsvDiff.prototype.process = function (data, callback) {
     }
 
     let diffResultGidField;
-    if(diffResultColumns[0] == "@@") {
+    if (diffResultColumns[0] == "@@") {
       diffResultColumns.shift();
       diffResultGidField = diffResultColumns[0];
     }
 
-    let isDataPointsFile = fileName.indexOf("--datapoints--") != -1 ? true : false;
+    let isDataPointsFile = isDatapointFile(fileName);
 
-    if(diffResult.length) {
+    if (diffResult.length) {
 
-      diffResult.forEach(function(value, index){
+      diffResult.forEach(function (value, index) {
 
         // simple-way, collect all data (mean full row) for update
 
         let modificationType = value.shift();
 
-        if(modificationType != '') {
+        if (modificationType != '') {
 
           if (modificationType == '+++') {
 
             // added
             let dataRow = {};
-            diffResultColumns.forEach(function(columnValue, columnIndex){
-              if(fileDiffData.header.remove.indexOf(columnValue) == -1) {
+            diffResultColumns.forEach(function (columnValue, columnIndex) {
+              if (fileDiffData.header.remove.indexOf(columnValue) == -1) {
                 // ready columns
                 dataRow[columnValue] = value[columnIndex];
               }
             });
 
-            if(dataRow) {
+            if (dataRow) {
               fileDiffData.body.create.push(dataRow);
             }
 
@@ -193,9 +195,9 @@ gitCsvDiff.prototype.process = function (data, callback) {
             let dataRowRemoved = {};
 
             // check that file with datapoints
-            if(isDataPointsFile) {
-              diffResultColumns.forEach(function(columnValue, columnIndex){
-                if(
+            if (isDataPointsFile) {
+              diffResultColumns.forEach(function (columnValue, columnIndex) {
+                if (
                   // disable changes for removed files
                 // fileDiffData.header.remove.indexOf(columnValue) == -1 &&
                 fileDiffData.header.create.indexOf(columnValue) == -1
@@ -216,7 +218,7 @@ gitCsvDiff.prototype.process = function (data, callback) {
             // updated, only added columns
             let dataRow = {};
             let dataRowOrigin = {};
-            diffResultHeader.forEach(function(columnValue, columnIndex) {
+            diffResultHeader.forEach(function (columnValue, columnIndex) {
               let columnKey = diffResultColumns[columnIndex];
               if (fileDiffData.header.create.indexOf(columnKey) != -1) {
                 dataRow[columnKey] = value[columnIndex];
@@ -230,7 +232,7 @@ gitCsvDiff.prototype.process = function (data, callback) {
             dataRowUpdated[diffResultGidField] = value[0];
             dataRowUpdated["data-update"] = dataRow;
 
-            if(isDataPointsFile) {
+            if (isDataPointsFile) {
               dataRowUpdated["data-origin"] = dataRowOrigin;
             }
 
@@ -242,12 +244,12 @@ gitCsvDiff.prototype.process = function (data, callback) {
             let dataRow = {};
             let dataRowOrigin = {};
 
-            value.forEach(function(valueCell, indexCell){
+            value.forEach(function (valueCell, indexCell) {
               let modificationSeparatorPosition = valueCell.indexOf('->');
               let columnKey = diffResultColumns[indexCell];
 
               // cell modified
-              if(modificationSeparatorPosition != -1) {
+              if (modificationSeparatorPosition != -1) {
 
                 let readyValueCell = valueCell.substring(modificationSeparatorPosition + 2);
                 let readyValueCellOrigin = valueCell.substring(0, modificationSeparatorPosition);
@@ -257,7 +259,7 @@ gitCsvDiff.prototype.process = function (data, callback) {
 
               } else if (isDataPointsFile) {
                 dataRow[columnKey] = valueCell;
-                if(fileDiffData.header.create.indexOf(columnKey) == -1) {
+                if (fileDiffData.header.create.indexOf(columnKey) == -1) {
                   dataRowOrigin[columnKey] = valueCell;
                 }
                 // check that it's not new column
@@ -271,7 +273,7 @@ gitCsvDiff.prototype.process = function (data, callback) {
             let conceptValueSearchFor = value[0];
             let conceptValueTypeIndex = conceptValueSearchFor.indexOf('->');
 
-            if(conceptValueTypeIndex != -1) {
+            if (conceptValueTypeIndex != -1) {
               conceptValueSearchFor = value[0].substring(0, conceptValueTypeIndex)
             }
 
@@ -280,7 +282,7 @@ gitCsvDiff.prototype.process = function (data, callback) {
             dataRowUpdated[diffResultGidField] = conceptValueSearchFor;
             dataRowUpdated["data-update"] = dataRow;
 
-            if(isDataPointsFile) {
+            if (isDataPointsFile) {
               dataRowUpdated["data-origin"] = dataRowOrigin;
             }
 
@@ -368,7 +370,7 @@ gitCsvDiff.prototype.process = function (data, callback) {
     }
 
     // clear remove header section for removed files
-    if(gitDiffFileStatus[fileName] == "D") {
+    if (gitDiffFileStatus[fileName] == "D") {
       fileDiffData.header.remove = [];
     }
 
@@ -381,26 +383,230 @@ gitCsvDiff.prototype.process = function (data, callback) {
   };
 
   function generateTranslations(resultDiff) {
-    if(!resultDiff.files) {
+
+    if (!resultDiff.files) {
       return;
     }
 
-    for(let file in resultDiff.files) {
+    for (let file in resultDiff.files) {
+
       if (!resultDiff.files.hasOwnProperty(file)) {
         continue;
       }
 
-      if(isTranslationFile(file)) {
+      const langFileMeta = getTranslationLanguage(file);
+
+      if (!!langFileMeta) {
+
+        // 1. check that base file exists in file-structure
+
+        if (!resultDiff.files[langFileMeta.base]) {
+          // Type of Modified File
+          resultDiff.files[langFileMeta.base] = 'M';
+          // Adding default structure
+          resultDiff.changes[langFileMeta.base] = _.cloneDeep(DIFF_STRUCTURE);
+        }
+
+        // 2. merge into base file diff
+
+        mergeWithTranslations(
+          langFileMeta.base,
+          resultDiff.changes[langFileMeta.base].body,
+          resultDiff.changes[file].body
+        );
 
       }
     }
-  };
+  }
 
-  function isTranslationFile(fileName) {
-    const regexpRule = /^ddf--translation--(([\w]{2,}-[\w]{2,})|([\w]{2,}))--/;
+  function getTranslationLanguage(fileName) {
+
+    const regexpRule = /lang\/(.*)\/(.*)/;
     const regexpMatch = regexpRule.exec(fileName);
-    console.log("regexpMatch", regexpMatch);
-  };
+
+    return !!regexpMatch ? {
+      lang: regexpMatch[1],
+      base: regexpMatch[2]
+    } : false;
+  }
+
+  function isDatapointFile(filename) {
+    return filename.indexOf("--datapoints--") != -1 ? true : false;
+  }
+
+  function getUniqueKeyForRemove(filename, item, isDatapoint) {
+
+    const keyArray = [];
+
+    if(isDatapoint) {
+
+      const fileParts = /ddf--datapoints--(.*)--by--(.*).csv/.exec(filename);
+      //const fileIndicator = fileParts[1];
+      const fileDemensions = fileParts[2].split("--");
+
+      _.forEach(fileDemensions, function(itemDemension){
+        keyArray.push(item[itemDemension]);
+      });
+
+    } else {
+
+      /* {
+            "gid": "company_size",
+            "company_size": "small"
+      } */
+
+      const mainKey = _.head(_.keys(item));
+      keyArray.push(item[mainKey]);
+      keyArray.push(item[item[mainKey]]);
+      // 'company_size*small'
+    }
+
+    return _.join(keyArray, '*');
+  }
+
+  function getUniqueKeyForCreate(filename, item, isDatapoint) {
+
+    if(isDatapoint) {
+      return getUniqueKeyForRemove(filename, item, isDatapoint);
+    }
+
+    /* {
+         "company_scale": "small",
+         "is--company_scale": "TRUE"
+     } */
+
+    const keyArray = [];
+    const mainKey = _.head(_.keys(item));
+    keyArray.push(mainKey);
+    keyArray.push(item[mainKey]);
+
+    // 'company_scale*small'
+    return _.join(keyArray, '*');
+  }
+
+  function getUniqueKeyForChange(filename, item, isDatapoint) {
+    if(isDatapoint) {
+      return getUniqueKeyForRemove(filename, item["data-origin"], isDatapoint);
+    } else {
+      return getUniqueKeyForRemove(filename, item, isDatapoint);
+    }
+  }
+
+  function mergeWithTranslations(filename, diffTarget, diffBase) {
+
+    const uniqueKeys = _getUniqueKeys(filename, diffTarget);
+
+    _mergeStructureRemove(uniqueKeys, filename, diffTarget, diffBase);
+    _mergeStructureCreate(uniqueKeys, filename, diffTarget, diffBase);
+    _mergeStructureChange(uniqueKeys, filename, diffTarget, diffBase);
+    _mergeStructureUpdate(uniqueKeys, filename, diffTarget, diffBase);
+  }
+
+  function _getUniqueKeys(filename, diffTarget) {
+
+    const isDatapoint = isDatapointFile(filename);
+    const uniqueKeys = new Set();
+
+    _.forEach(diffTarget.remove, function (item) {
+      const key = getUniqueKeyForRemove(filename, item, isDatapoint);
+      uniqueKeys.add(key);
+    });
+    _.forEach(diffTarget.create, function (item) {
+      const key = getUniqueKeyForCreate(filename, item, isDatapoint);
+      uniqueKeys.add(key);
+    });
+    _.forEach(diffTarget.change, function (item) {
+      const key = getUniqueKeyForChange(filename, item, isDatapoint);
+      uniqueKeys.add(key);
+    });
+    _.forEach(diffTarget.update, function (item) {
+      const key = getUniqueKeyForChange(filename, item, isDatapoint);
+      uniqueKeys.add(key);
+    });
+
+    return uniqueKeys;
+  }
+
+  function _mergeStructureRemove(uniqueKeys, filename, diffTarget, diffBase) {
+
+    if (diffBase.remove.length) {
+
+      const isDatapoint = isDatapointFile(filename);
+
+      // merge unique keys into base file
+      _.forEach(diffBase.remove, function (item) {
+        const key = getUniqueKeyForRemove(filename, item, isDatapoint);
+        if(uniqueKeys.has(key)) {
+          return;
+        }
+
+        // add to target
+        diffTarget.translate.remove.push(item);
+        uniqueKeys.add(key);
+      });
+    }
+  }
+  function _mergeStructureCreate(uniqueKeys, filename, diffTarget, diffBase) {
+
+    if (diffBase.create.length) {
+
+      const isDatapoint = isDatapointFile(filename);
+
+      // merge unique keys into base file
+      _.forEach(diffBase.create, function (item) {
+        const key = getUniqueKeyForCreate(filename, item, isDatapoint);
+        if(uniqueKeys.has(key)) {
+          return;
+        }
+
+        // add to target
+        diffTarget.translate.create.push(item);
+        uniqueKeys.add(key);
+      });
+
+    }
+  }
+  function _mergeStructureChange(uniqueKeys, filename, diffTarget, diffBase) {
+
+    if (diffBase.change.length) {
+
+      const isDatapoint = isDatapointFile(filename);
+
+      // merge unique keys into base file
+      _.forEach(diffBase.change, function (item) {
+        const key = getUniqueKeyForChange(filename, item, isDatapoint);
+        if(uniqueKeys.has(key)) {
+          return;
+        }
+
+        // add to target
+        diffTarget.translate.change.push(item);
+        uniqueKeys.add(key);
+      });
+
+    }
+  }
+  function _mergeStructureUpdate(uniqueKeys, filename, diffTarget, diffBase) {
+
+    if (diffBase.update.length) {
+
+      const isDatapoint = isDatapointFile(filename);
+
+      // merge unique keys into base file
+      _.forEach(diffBase.update, function (item) {
+        const key = getUniqueKeyForChange(filename, item, isDatapoint);
+        if(uniqueKeys.has(key)) {
+          return;
+        }
+
+        // add to target
+        diffTarget.translate.update.push(item);
+        uniqueKeys.add(key);
+      });
+
+    }
+  }
+
 };
 
 module.exports = new gitCsvDiff();

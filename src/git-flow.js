@@ -5,7 +5,7 @@ const path = require('path');
 const async = require("async");
 
 const simpleGit = require('simple-git')();
-//simpleGit.silent(false);
+simpleGit.silent(true);
 
 function gitFlow () {};
 
@@ -91,7 +91,8 @@ gitFlow.prototype.getFileDiffByHashes = function (data, gitDiffFileStatus, callb
 
       // fix path with folders
       gitDiffFileList.forEach(function(item, index, arr){
-        arr[index] = path.parse(item).base;
+        //arr[index] = path.parse(item).base;
+        arr[index] = item;
       });
 
       simpleGit.diff([hashFrom + '..' + hashTo, "--name-status"], function(error, result) {

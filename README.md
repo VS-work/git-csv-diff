@@ -20,7 +20,10 @@ const options = {
   github: 'git@github.com:VS-work/ddf-gapminder-world-stub-4-validated.git',
   hashFrom: '63fdcedcd44099f8296ad72d925d2805c6d7cf8e',
   hashTo: '177cbf088612423289c7666b9fb29e6607eb54eb',
-  sourceFolder: '*path-to-repo-folder*'
+  sourceFolder: './repos/',
+  // optional
+  translations: true,
+  resultToFile: true
 };
 
 gitCsvDiff.process(options, function(error, result) {
