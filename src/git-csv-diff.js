@@ -51,13 +51,9 @@ gitCsvDiff.prototype.process = function (data, callback) {
       // iteration
       function (fileName, doneMapLimit) {
 
-        //console.log("generate diff for file: ", fileName);
-
         gitFlow.showFileStateByHash(data, fileName, function (error, result) {
-
           getDiffByFile(fileName, result);
           return doneMapLimit(error);
-
         });
 
       },
@@ -73,10 +69,12 @@ gitCsvDiff.prototype.process = function (data, callback) {
           'changes': dataRequest
         };
 
+        // additional option
         if (translations) {
           generateTranslations(result);
         }
 
+        // additional option
         if (resultToFile) {
           const resultFileName = sourceFolderPath + "diff-operation-result.json";
           fs.writeFileSync(resultFileName, JSON.stringify(result));
@@ -106,7 +104,7 @@ gitCsvDiff.prototype.process = function (data, callback) {
     let highlighter = new daff.TableDiff(filesDiff, flags);
     highlighter.hilite(diffResult);
 
-    let fileDiffJSON = sourceFolderPath + "diff--" + fileName + ".json";
+    //let fileDiffJSON = sourceFolderPath + "diff--" + fileName + ".json";
     //fs.writeFileSync(fileDiffJSON, JSON.stringify(diffResult));
 
     /* Prepare Data Structure */
@@ -441,24 +439,17 @@ gitCsvDiff.prototype.process = function (data, callback) {
     if(isDatapoint) {
 
       const fileParts = /ddf--datapoints--(.*)--by--(.*).csv/.exec(filename);
-      //const fileIndicator = fileParts[1];
-      const fileDemensions = fileParts[2].split("--");
+      const fileDimensions = fileParts[2].split("--");
 
-      _.forEach(fileDemensions, function(itemDemension){
-        keyArray.push(item[itemDemension]);
+      _.forEach(fileDimensions, function(itemDimension){
+        keyArray.push(item[itemDimension]);
       });
 
     } else {
 
-      /* {
-            "gid": "company_size",
-            "company_size": "small"
-      } */
-
       const mainKey = _.head(_.keys(item));
       keyArray.push(item[mainKey]);
       keyArray.push(item[item[mainKey]]);
-      // 'company_size*small'
     }
 
     return _.join(keyArray, '*');
@@ -470,17 +461,11 @@ gitCsvDiff.prototype.process = function (data, callback) {
       return getUniqueKeyForRemove(filename, item, isDatapoint);
     }
 
-    /* {
-         "company_scale": "small",
-         "is--company_scale": "TRUE"
-     } */
-
     const keyArray = [];
     const mainKey = _.head(_.keys(item));
     keyArray.push(mainKey);
     keyArray.push(item[mainKey]);
 
-    // 'company_scale*small'
     return _.join(keyArray, '*');
   }
 

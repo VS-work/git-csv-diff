@@ -89,13 +89,7 @@ gitFlow.prototype.getFileDiffByHashes = function (data, gitDiffFileStatus, callb
         return !!value && value.indexOf(".csv") != -1;
       });
 
-      // fix path with folders
-      gitDiffFileList.forEach(function(item, index, arr){
-        //arr[index] = path.parse(item).base;
-        arr[index] = item;
-      });
-
-      simpleGit.diff([hashFrom + '..' + hashTo, "--name-status"], function(error, result) {
+      simpleGit.diff([`${hashFrom}..${hashTo}`, "--name-status"], function(error, result) {
 
         result.split("\n").filter(function(value) {
           return !!value && value.indexOf(".csv") != -1;
