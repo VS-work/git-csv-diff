@@ -29,7 +29,8 @@ const options = {
 gitCsvDiff.process(options, function(error, result) {
   //console.log("Files:", result.files);
   //console.log("Changes:", result.changes);
-  console.log("Done");
+  console.log("Output:", result.path);
+  console.log("Done!");
 });
 
 ```

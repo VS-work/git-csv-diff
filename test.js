@@ -12,6 +12,7 @@ const options = {
   hashFrom: commitList[2],
   hashTo: commitList[3],
   sourceFolder: './repos/',
+  // optional
   translations: true,
   resultToFile: true
 };
@@ -19,5 +20,6 @@ const options = {
 gitCsvDiff.process(options, function(error, result) {
   //console.log("Files:", result.files);
   //console.log("Changes:", result.changes);
-  console.log("Done");
+  console.log("Output:", result.path);
+  console.log("Done!");
 });

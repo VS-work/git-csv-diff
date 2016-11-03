@@ -76,7 +76,8 @@ gitCsvDiff.prototype.process = function (data, callback) {
 
         // additional option
         if (resultToFile) {
-          const resultFileName = sourceFolderPath + "diff-operation-result.json";
+          const resultFileName = getFileNameResult(sourceFolderPath, data.github);
+          result['path'] = resultFileName;
           fs.writeFileSync(resultFileName, JSON.stringify(result));
         }
 
@@ -430,6 +431,24 @@ gitCsvDiff.prototype.process = function (data, callback) {
 
   function isDatapointFile(filename) {
     return filename.indexOf("--datapoints--") != -1 ? true : false;
+  }
+
+  function getFileNameResult(pathFolder, github) {
+
+    const fileParts = /:(.*)\/(.*).git/.exec(github);
+
+    const filePartsResult = [];
+    filePartsResult.push('result');
+
+    if(!fileParts) {
+      filePartsResult.push('default');
+    } else {
+      filePartsResult.push(fileParts[1]);
+      filePartsResult.push(fileParts[2]);
+    }
+
+    filePartsResult.push('output.json');
+    return path.resolve(pathFolder, filePartsResult.join("--"));
   }
 
   function getUniqueKeyForRemove(filename, item, isDatapoint) {

@@ -1,7 +1,7 @@
 {
   "name": "git-csv-diff",
   "author": "Valor-Software",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "license": "GPL-3.0",
   "description": "Library generate difference between csv-files based on Git commit hash",
   "contributors": [
