@@ -16,21 +16,23 @@ Make sure you have node.js (version 4.x.x or higher) installed on your computer.
 
 const gitCsvDiff = require('git-csv-diff');
 
-const options = {
-  github: 'git@github.com:VS-work/ddf-gapminder-world-stub-4-validated.git',
-  hashFrom: '63fdcedcd44099f8296ad72d925d2805c6d7cf8e',
-  hashTo: '177cbf088612423289c7666b9fb29e6607eb54eb',
-  sourceFolder: './repos/',
-  // optional
-  translations: true,
-  resultToFile: true
-};
+/*
+    fileName: 'ddf--datapoints--forest_products_removal_total_dollar--by--geo--time.csv';
+    diff: {
+        from: 'state of the base file'
+        to: 'state of the target file'
+    };
+    fileModifier: 'M'/'D'/'A'
+*/
 
-gitCsvDiff.process(options, function(error, result) {
-  //console.log("Files:", result.files);
-  //console.log("Changes:", result.changes);
-  console.log("Output:", result.path);
-  console.log("Done!");
+let diffResult = {};
+
+gitCsvDiff.process(fileName, diff, fileModifier, function(error, result) {
+  //console.log("Files:", result.file);
+  //console.log("Changes:", result.diff);
+  diffResult[result.file] = result.diff;
+
+  gitCsvDiff.translations(diffResult);
 });
 
 ```
