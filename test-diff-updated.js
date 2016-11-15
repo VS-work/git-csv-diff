@@ -14,11 +14,18 @@ MockTo += "company,country" + "\r\n";
 MockTo += "mcrsft_updated,United States of America" + "\r\n";
 MockTo += "valor_updated,Ukraine";
 
+let MockDatapackageOld = {"name":"ddf--ws-testing","title":"ddf--ws-testing","description":"","version":"0.0.1","language":{"id":"en","name":"English"},"translations":[{"id":"nl-nl","name":"Dutch"}],"license":"","author":"","resources":[{"path":"ddf--concepts.csv","name":"ddf--concepts","schema":{"fields":[{"name":"concept"},{"name":"concept_type"},{"name":"domain"},{"name":"additional_column"}],"primaryKey":"concept"}},{"path":"ddf--entities--region.csv","name":"ddf--entities--region","schema":{"fields":[{"name":"region"},{"name":"full_name_changed"}],"primaryKey":"region"}}]};
+let MockDatapackageNew = {"name":"ddf--ws-testing","title":"ddf--ws-testing","description":"","version":"0.0.1","language":{"id":"en","name":"English"},"translations":[{"id":"nl-nl","name":"Dutch"}],"license":"","author":"","resources":[{"path":"ddf--entities--region.csv","name":"ddf--entities--region","schema":{"fields":[{"name":"region"},{"name":"full_name_changed"}],"primaryKey":"region"}},{"path":"ddf--concepts.csv","name":"ddf--concepts","schema":{"fields":[{"name":"concept"},{"name":"concept_type"},{"name":"domain"},{"name":"additional_column"}],"primaryKey":"concept"}},{"path":"ddf--entities--region.csv","name":"ddf--entities--region","schema":{"fields":[{"name":"region"},{"name":"full_name_changed"}],"primaryKey":"region"}}]};
+
 /* params */
 
 const metaData = {
-  fileName: "ddf--entities--company.csv",
-  fileModifier: "M"
+  fileName: "ddf--entities--region.csv",
+  fileModifier: "M",
+  datapackage: {
+    old: MockDatapackageOld,
+    new: MockDatapackageNew
+  }
 };
 const dataDiff = {
   from: MockFrom,

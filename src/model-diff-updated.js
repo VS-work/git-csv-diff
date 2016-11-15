@@ -3,13 +3,15 @@
 const _ = require('lodash');
 
 const DIFF_STRUCTURE_UPDATED = {
-  object: {
-    /* object with structure from old diff */
-  },
+  object: null,
   metadata: {
-    filename: false,
-    action: false,
-    remove: []
+    file: {
+      new: null,
+      old: null
+    },
+    action: null,
+    removedColumns: [],
+    type: null
   }
 };
 
@@ -20,6 +22,5 @@ function modelDiffUpdated() {
     }
   };
 };
-
 
 module.exports = new modelDiffUpdated();

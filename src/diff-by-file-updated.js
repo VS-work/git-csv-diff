@@ -7,6 +7,12 @@ const async = require("async");
 const ModelDiff = require('./model-diff');
 const ModelDiffUpdated = require('./model-diff-updated');
 
+const constants = {
+  DATAPOINTS: 'datapoints',
+  CONCEPTS: 'concepts',
+  ENTITIES: 'entities'
+};
+
 function diffByFileUpdated() {
   return {
     process: _process
@@ -48,7 +54,10 @@ function _process(metaData, dataDiff, streams) {
   let modelDiff = ModelDiffUpdated.init();
 
   // set FileName
-  modelDiff.metadata.filename = metaData.fileName;
+
+  // ToDo :: MetadataJson File
+  setMetaDataFile(modelDiff.metadata.file, metaData);
+  setMetaDataType(modelDiff.metadata);
 
 
   /* Slice Groupd of Changes */
@@ -98,7 +107,7 @@ function _process(metaData, dataDiff, streams) {
   // update `remove` section from header
   if (metaData.fileModifier != "D") {
     // clear remove header section for removed files
-    modelDiff.metadata.remove = _.clone(fileDiffData.header.remove);
+    modelDiff.metadata.removedColumns = _.clone(fileDiffData.header.remove);
   }
 
   let diffResultGidField;
@@ -343,6 +352,26 @@ function isDatapointFile(filename) {
 }
 function isLanguageFile(filename) {
   return filename.indexOf("lang/") != -1 ? true : false;
+}
+function setMetaDataFile(file, metaData) {
+  const resourcesByPathOld = _.keyBy(metaData.datapackage.old.resources, 'path');
+  file.old = resourcesByPathOld[metaData.fileName];
+
+  const resourcesByPathNew = _.keyBy(metaData.datapackage.new.resources, 'path');
+  file.new = resourcesByPathNew[metaData.fileName];
+}
+
+function setMetaDataType(metadata) {
+  const primaryKeyRaw = _.clone(metadata.file.new.schema.primaryKey);
+  const primaryKey = _.isString(primaryKeyRaw) ? [primaryKeyRaw] : primaryKeyRaw;
+
+  if (primaryKey.length > 1)
+    return metadata.type = constants.DATAPOINTS;
+
+  if (_.includes(constants.CONCEPTS, _.first(primaryKey)))
+    return metadata.type = constants.CONCEPTS;
+
+  return metadata.type = constants.ENTITIES;
 }
 
 function writeToStream(stream, model) {
