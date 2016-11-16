@@ -357,12 +357,18 @@ function setMetaDataFile(file, metaData) {
   const resourcesByPathOld = _.keyBy(metaData.datapackage.old.resources, 'path');
   file.old = resourcesByPathOld[metaData.fileName];
 
-  const resourcesByPathNew = _.keyBy(metaData.datapackage.new.resources, 'path');
-  file.new = resourcesByPathNew[metaData.fileName];
+  // info is not available if file was removed
+  if(metaData.fileModifier != "D") {
+    const resourcesByPathNew = _.keyBy(metaData.datapackage.new.resources, 'path');
+    file.new = resourcesByPathNew[metaData.fileName];
+  }
 }
 
 function setMetaDataType(metadata) {
-  const primaryKeyRaw = _.clone(metadata.file.new.schema.primaryKey);
+  // detect schema from `old` file if it was removed and not exists in `new`
+  const schemaSource = metadata.file.new ? metadata.file.new : metadata.file.old;
+
+  const primaryKeyRaw = _.clone(schemaSource.schema.primaryKey);
   const primaryKey = _.isString(primaryKeyRaw) ? [primaryKeyRaw] : primaryKeyRaw;
 
   if (primaryKey.length > 1)
