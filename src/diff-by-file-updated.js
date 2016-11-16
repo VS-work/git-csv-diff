@@ -56,10 +56,9 @@ function _process(metaData, dataDiff, streams) {
 
   // set FileName
 
-  // ToDo :: MetadataJson File
   setMetaDataFile(modelDiff.metadata.file, metaData);
   setMetaDataType(modelDiff.metadata);
-
+  setMetaDataLanguage(modelDiff, metaData.fileName);
 
   /* Slice Groupd of Changes */
 
@@ -353,6 +352,15 @@ function isDatapointFile(filename) {
 }
 function isLanguageFile(filename) {
   return filename.indexOf("lang/") != -1 ? true : false;
+}
+
+function setMetaDataLanguage(metaData, fileName) {
+  let lang = 'default';
+  if(isLanguageFile(fileName)) {
+    const regexpRes = /lang\/(.+)\//.exec(fileName);
+    lang = regexpRes[1] || lang;
+  }
+  metaData.lang = lang;
 }
 function setMetaDataFile(file, metaData) {
 

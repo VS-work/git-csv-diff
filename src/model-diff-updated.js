@@ -11,7 +11,8 @@ const DIFF_STRUCTURE_UPDATED = {
     },
     action: null,
     removedColumns: [],
-    type: null
+    type: null,
+    lang: null
   }
 };
 
