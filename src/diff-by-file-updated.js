@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const daff = require('daff');
+const path = require('path');
 const async = require("async");
 
 const ModelDiff = require('./model-diff');
@@ -354,13 +355,16 @@ function isLanguageFile(filename) {
   return filename.indexOf("lang/") != -1 ? true : false;
 }
 function setMetaDataFile(file, metaData) {
+
+  const fileName = path.parse(metaData.fileName).base;
+
   const resourcesByPathOld = _.keyBy(metaData.datapackage.old.resources, 'path');
-  file.old = resourcesByPathOld[metaData.fileName];
+  file.old = resourcesByPathOld[fileName];
 
   // info is not available if file was removed
   if(metaData.fileModifier != "D") {
     const resourcesByPathNew = _.keyBy(metaData.datapackage.new.resources, 'path');
-    file.new = resourcesByPathNew[metaData.fileName];
+    file.new = resourcesByPathNew[fileName];
   }
 }
 

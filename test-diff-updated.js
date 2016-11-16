@@ -20,7 +20,7 @@ let MockDatapackageNew = {"name":"ddf--ws-testing","title":"ddf--ws-testing","de
 /* params */
 
 const metaData = {
-  fileName: "ddf--entities--region.csv",
+  fileName: "lang/nl-nl/ddf--entities--region.csv",
   fileModifier: "M",
   datapackage: {
     old: MockDatapackageOld,
