@@ -58,7 +58,7 @@ function _process(metaData, dataDiff, streams) {
 
   setMetaDataFile(modelDiff.metadata.file, metaData);
   setMetaDataType(modelDiff.metadata);
-  setMetaDataLanguage(modelDiff, metaData.fileName);
+  setMetaDataLanguage(modelDiff.metadata, metaData.fileName);
 
   /* Slice Groupd of Changes */
 
