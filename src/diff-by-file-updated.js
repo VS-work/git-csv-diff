@@ -54,11 +54,12 @@ function _process(metaData, dataDiff, streams) {
   let fileDiffData = ModelDiff.init();
   let modelDiff = ModelDiffUpdated.init();
 
-  // set FileName
-
   setMetaDataFile(modelDiff.metadata.file, metaData);
   setMetaDataType(modelDiff.metadata);
   setMetaDataLanguage(modelDiff.metadata, metaData.fileName);
+
+  const primaryKeys = getPrimaryKeys(modelDiff.metadata);
+  const primaryKey = _.first(primaryKeys);
 
   /* Slice Groupd of Changes */
 
@@ -111,9 +112,11 @@ function _process(metaData, dataDiff, streams) {
   }
 
   let diffResultGidField;
+  let indexGid = 0;
   if (diffResultColumns[0] == "@@") {
     diffResultColumns.shift();
-    diffResultGidField = diffResultColumns[0];
+    indexGid = diffResultColumns.indexOf(primaryKey);
+    diffResultGidField = diffResultColumns[indexGid];
   }
 
   let isDataPointsFile = isDatapointFile(metaData.fileName);
@@ -166,7 +169,7 @@ function _process(metaData, dataDiff, streams) {
             });
           } else {
             dataRowRemoved['gid'] = diffResultGidField;
-            dataRowRemoved[diffResultGidField] = value[0];
+            dataRowRemoved[diffResultGidField] = value[indexGid];
           }
 
           // fileDiffData.body.remove.push(dataRowRemoved);
@@ -191,7 +194,7 @@ function _process(metaData, dataDiff, streams) {
 
           let dataRowUpdated = {};
           dataRowUpdated["gid"] = diffResultGidField;
-          dataRowUpdated[diffResultGidField] = value[0];
+          dataRowUpdated[diffResultGidField] = value[indexGid];
           dataRowUpdated["data-update"] = dataRow;
 
           if (isDataPointsFile) {
@@ -281,7 +284,7 @@ function _process(metaData, dataDiff, streams) {
 
           let dataRowChanged = {};
           dataRowChanged["gid"] = diffResultGidField;
-          dataRowChanged[diffResultGidField] = value[0];
+          dataRowChanged[diffResultGidField] = value[indexGid];
           dataRowChanged["data-update"] = dataRow;
 
           if (isDataPointsFile) {
@@ -328,7 +331,7 @@ function _process(metaData, dataDiff, streams) {
 
           let dataRowChanged = {};
           dataRowChanged["gid"] = diffResultGidField;
-          dataRowChanged[diffResultGidField] = value[0];
+          dataRowChanged[diffResultGidField] = value[indexGid];
           dataRowChanged["data-update"] = dataRow;
 
           if (isDataPointsFile) {
@@ -377,19 +380,23 @@ function setMetaDataFile(file, metaData) {
 }
 
 function setMetaDataType(metadata) {
-  // detect schema from `old` file if it was removed and not exists in `new`
-  const schemaSource = metadata.file.new ? metadata.file.new : metadata.file.old;
+  const primaryKeys = getPrimaryKeys(metadata);
 
-  const primaryKeyRaw = _.clone(schemaSource.schema.primaryKey);
-  const primaryKey = _.isString(primaryKeyRaw) ? [primaryKeyRaw] : primaryKeyRaw;
-
-  if (primaryKey.length > 1)
+  if (primaryKeys.length > 1)
     return metadata.type = constants.DATAPOINTS;
 
-  if (_.includes(constants.CONCEPTS, _.first(primaryKey)))
+  if (_.includes(constants.CONCEPTS, _.first(primaryKeys)))
     return metadata.type = constants.CONCEPTS;
 
   return metadata.type = constants.ENTITIES;
+}
+
+function getPrimaryKeys(metadata) {
+  // detect schema from `old` file if it was removed and not exists in `new`
+  const schemaSource = metadata.file.new ? metadata.file.new : metadata.file.old;
+  const primaryKeyRaw = _.clone(schemaSource.schema.primaryKey);
+
+  return _.isString(primaryKeyRaw) ? [primaryKeyRaw] : primaryKeyRaw;
 }
 
 function writeToStream(stream, model) {
