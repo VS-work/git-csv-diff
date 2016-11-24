@@ -240,7 +240,7 @@ function _process(metaData, dataDiff, streams) {
 
           // fix :: gid-column changed
 
-          let conceptValueSearchFor = value[diffResultGidField];
+          let conceptValueSearchFor = value[indexGid];
           let conceptValueTypeIndex = conceptValueSearchFor.indexOf('->');
 
           if (conceptValueTypeIndex != -1) {
