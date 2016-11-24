@@ -33,7 +33,8 @@ function _process(metaData, dataDiff, streams) {
   // streams.diff;
   // streams.lang;
 
-  const baseStream = isLanguageFile(metaData.fileName) ? streams.lang : streams.diff;
+  const isTranslations = isLanguageFile(metaData.fileName);
+  const baseStream = isTranslations ? streams.lang : streams.diff;
 
   let diffResult = [];
 
@@ -237,13 +238,15 @@ function _process(metaData, dataDiff, streams) {
             }
           });
 
-          // fix first column changes
+          // fix :: gid-column changed
 
-          let conceptValueSearchFor = value[0];
+          let conceptValueSearchFor = value[diffResultGidField];
           let conceptValueTypeIndex = conceptValueSearchFor.indexOf('->');
 
           if (conceptValueTypeIndex != -1) {
-            conceptValueSearchFor = value[0].substring(0, conceptValueTypeIndex)
+            //conceptValueSearchFor = value[0].substring(0, conceptValueTypeIndex)
+            // not old, but new value :: from `new` for translation and from `old` for others
+            conceptValueSearchFor = isTranslations ? dataRow[diffResultGidField] : dataRowOrigin[diffResultGidField];
           }
 
           let dataRowUpdated = {};
