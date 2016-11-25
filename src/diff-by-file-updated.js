@@ -238,15 +238,15 @@ function _process(metaData, dataDiff, streams) {
             }
           });
 
-          // fix :: gid-column changed
-
+          // new Gid value
           let conceptValueSearchFor = value[indexGid];
           let conceptValueTypeIndex = conceptValueSearchFor.indexOf('->');
+          let gidChangeDetection = (conceptValueTypeIndex != -1) ? true : false;
 
-          if (conceptValueTypeIndex != -1) {
-            //conceptValueSearchFor = value[0].substring(0, conceptValueTypeIndex)
-            // not old, but new value :: from `new` for translation and from `old` for others
-            conceptValueSearchFor = isTranslations ? dataRow[diffResultGidField] : dataRowOrigin[diffResultGidField];
+          // gid-column changed
+          if (gidChangeDetection) {
+            // old gid value
+            conceptValueSearchFor = conceptValueSearchFor.substring(0, conceptValueTypeIndex);
           }
 
           let dataRowUpdated = {};
@@ -258,10 +258,34 @@ function _process(metaData, dataDiff, streams) {
             dataRowUpdated["data-origin"] = dataRowOrigin;
           }
 
-          // fileDiffData.body.change.push(dataRowUpdated);
-          modelDiff.metadata.action = 'change';
-          modelDiff.object = dataRowUpdated;
-          writeToStream(baseStream, modelDiff);
+
+          if(isTranslations && gidChangeDetection) {
+
+            // custom flow for translations with changed gid (split `change` to `remove` + `create`)
+
+            // `remove` action
+            const dataRowRemoved = {};
+            dataRowRemoved['gid'] = diffResultGidField;
+            dataRowRemoved[diffResultGidField] = conceptValueSearchFor;
+
+            modelDiff.metadata.action = 'remove';
+            modelDiff.object = dataRowRemoved;
+            writeToStream(baseStream, modelDiff);
+
+            // `create` action
+            modelDiff.metadata.action = 'create';
+            modelDiff.object = dataRow;
+            writeToStream(baseStream, modelDiff);
+
+          } else {
+
+            // default flow
+
+            // fileDiffData.body.change.push(dataRowUpdated);
+            modelDiff.metadata.action = 'change';
+            modelDiff.object = dataRowUpdated;
+            writeToStream(baseStream, modelDiff);
+          }
         }
         // empty modifier symbol
       } else {
