@@ -212,6 +212,7 @@ function _process(metaData, dataDiff, streams) {
 
           // updated, only changed cell
           let dataRow = {};
+          let dataRowLang = {};
           let dataRowOrigin = {};
 
           value.forEach(function (valueCell, indexCell) {
@@ -226,15 +227,24 @@ function _process(metaData, dataDiff, streams) {
 
               dataRow[columnKey] = readyValueCell;
               dataRowOrigin[columnKey] = readyValueCellOrigin;
+              // collect all changes for translations anyway
+              dataRowLang[columnKey] = readyValueCell;
 
-            } else if (isDataPointsFile) {
-              dataRow[columnKey] = valueCell;
-              if (fileDiffData.header.create.indexOf(columnKey) == -1) {
-                dataRowOrigin[columnKey] = valueCell;
+            } else {
+
+              // collect all changes for translations anyway
+              dataRowLang[columnKey] = valueCell;
+
+              if (isDataPointsFile) {
+                dataRow[columnKey] = valueCell;
+                if (fileDiffData.header.create.indexOf(columnKey) == -1) {
+                  dataRowOrigin[columnKey] = valueCell;
+                }
               }
               // check that it's not new column
-            } else if (fileDiffData.header.create.indexOf(columnKey) != -1) {
-              dataRow[columnKey] = valueCell;
+              else if (fileDiffData.header.create.indexOf(columnKey) != -1) {
+                dataRow[columnKey] = valueCell;
+              }
             }
           });
 
@@ -274,7 +284,7 @@ function _process(metaData, dataDiff, streams) {
 
             // `create` action
             modelDiff.metadata.action = 'create';
-            modelDiff.object = dataRow;
+            modelDiff.object = dataRowLang;
             writeToStream(baseStream, modelDiff);
 
           } else {
