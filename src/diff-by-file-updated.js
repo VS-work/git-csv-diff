@@ -220,8 +220,7 @@ function _process(metaData, dataDiff, streams) {
             let columnKey = diffResultColumns[indexCell];
 
             // cell modified
-            if (modificationSeparatorPosition != -1) {
-
+            if (modificationSeparatorPosition !== -1) {
               let readyValueCell = valueCell.substring(modificationSeparatorPosition + 2);
               let readyValueCellOrigin = valueCell.substring(0, modificationSeparatorPosition);
 
@@ -232,17 +231,15 @@ function _process(metaData, dataDiff, streams) {
 
             } else {
 
-              // collect all changes for translations anyway
-              dataRowLang[columnKey] = valueCell;
-
               if (isDataPointsFile) {
-                dataRow[columnKey] = valueCell;
                 if (fileDiffData.header.create.indexOf(columnKey) == -1) {
                   dataRowOrigin[columnKey] = valueCell;
                 }
               }
-              // check that it's not new column
-              else if (fileDiffData.header.create.indexOf(columnKey) != -1) {
+              // check if not removed column
+              if (fileDiffData.header.remove.indexOf(columnKey) === -1) {
+                // collect all changes for translations anyway
+                dataRowLang[columnKey] = valueCell;
                 dataRow[columnKey] = valueCell;
               }
             }
@@ -315,7 +312,9 @@ function _process(metaData, dataDiff, streams) {
               }
             } else {
               // new values for added columns
-              dataRow[columnKey] = valueCell;
+              if (fileDiffData.header.remove.indexOf(columnKey) === -1) {
+                dataRow[columnKey] = valueCell;
+              }
             }
           });
 
@@ -356,13 +355,18 @@ function _process(metaData, dataDiff, streams) {
                 columnKeyOld = fileDiffData.header.update[oldColumnIndex][columnKey];
               }
 
-              dataRow[columnKey] = valueCell;
+              if (fileDiffData.header.remove.indexOf(columnKey) === -1) {
+                dataRow[columnKey] = valueCell;
+              }
+
               if (isDataPointsFile) {
                 dataRowOrigin[columnKeyOld] = valueCell;
               }
             } else {
               // new column
-              dataRow[columnKey] = valueCell;
+              if (fileDiffData.header.remove.indexOf(columnKey) === -1) {
+                dataRow[columnKey] = valueCell;
+              }
             }
           });
 
