@@ -88,6 +88,8 @@ function _process(metaData, dataDiff, streams) {
           } else if (value == '---') {
             // removed
             fileDiffData.header.remove.push(diffResultColumns[index + 1]);
+          } else if (value === ':') {
+            // re-ordered, skip it
           } else {
             // modified
             let oldColumn = value.substring(1, value.length - 1);
