@@ -391,24 +391,37 @@ function _process(metaData, dataDiff, streams) {
         if (fileDiffData.header.remove.length) {
           if(isDataPointsFile && isTranslations) {
 
-            // removed
-            let dataRowRemoved = {};
+            // updated, only changed cell
+            let dataRow = {};
+            let dataRowLang = {};
+            let dataRowOrigin = {};
 
-            // check that file with datapoints
-            diffResultColumns.forEach(function (columnValue, columnIndex) {
-                if (
-                  fileDiffData.header.remove.indexOf(columnValue) == -1 &&
-                  fileDiffData.header.create.indexOf(columnValue) == -1
-                ) {
-                  // ready columns
-                  dataRowRemoved[columnValue] = value[columnIndex];
-                }
+            value.forEach(function (valueCell, indexCell) {
+              let columnKey = diffResultColumns[indexCell];
+              if (fileDiffData.header.create.indexOf(columnKey) == -1) {
+                dataRowOrigin[columnKey] = valueCell;
+              }
+              // check if not removed column
+              if (fileDiffData.header.remove.indexOf(columnKey) === -1) {
+                // collect all changes for translations anyway
+                dataRowLang[columnKey] = valueCell;
+                dataRow[columnKey] = valueCell;
+              }
             });
 
-            // fileDiffData.body.remove.push(dataRowRemoved);
-            modelDiff.metadata.action = 'remove';
-            modelDiff.object = dataRowRemoved;
+            let conceptValueSearchFor = value[indexGid];
+
+            let dataRowUpdated = {};
+            dataRowUpdated["gid"] = diffResultGidField;
+            dataRowUpdated[diffResultGidField] = conceptValueSearchFor;
+            dataRowUpdated["data-update"] = dataRow;
+            dataRowUpdated["data-origin"] = dataRowOrigin;
+
+            // fileDiffData.body.change.push(dataRowUpdated);
+            modelDiff.metadata.action = 'change';
+            modelDiff.object = dataRowUpdated;
             writeToStream(baseStream, modelDiff);
+
           }
         }
       }
