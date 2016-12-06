@@ -386,6 +386,31 @@ function _process(metaData, dataDiff, streams) {
           modelDiff.object = dataRowChanged;
           writeToStream(baseStream, modelDiff);
         }
+
+        // check that there is no removed columns
+        if (fileDiffData.header.remove.length) {
+          if(isDataPointsFile && isTranslations) {
+
+            // removed
+            let dataRowRemoved = {};
+
+            // check that file with datapoints
+            diffResultColumns.forEach(function (columnValue, columnIndex) {
+                if (
+                  fileDiffData.header.remove.indexOf(columnValue) == -1 &&
+                  fileDiffData.header.create.indexOf(columnValue) == -1
+                ) {
+                  // ready columns
+                  dataRowRemoved[columnValue] = value[columnIndex];
+                }
+            });
+
+            // fileDiffData.body.remove.push(dataRowRemoved);
+            modelDiff.metadata.action = 'remove';
+            modelDiff.object = dataRowRemoved;
+            writeToStream(baseStream, modelDiff);
+          }
+        }
       }
     });
   }
