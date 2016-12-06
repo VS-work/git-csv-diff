@@ -266,7 +266,7 @@ function _process(metaData, dataDiff, streams) {
           }
 
 
-          if(isTranslations && gidChangeDetection) {
+          if(isTranslations && gidChangeDetection && !isDataPointsFile) {
 
             // custom flow for translations with changed gid (split `change` to `remove` + `create`)
 
