@@ -12,7 +12,8 @@ const DIFF_STRUCTURE_UPDATED = {
     action: null,
     removedColumns: [],
     type: null,
-    lang: null
+    lang: null,
+    onlyColumnsRemoved: false
   }
 };
 

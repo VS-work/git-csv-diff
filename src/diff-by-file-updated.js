@@ -418,6 +418,7 @@ function _process(metaData, dataDiff, streams) {
             dataRowUpdated["data-origin"] = dataRowOrigin;
 
             // fileDiffData.body.change.push(dataRowUpdated);
+            modelDiff.metadata.onlyColumnsRemoved = true;
             modelDiff.metadata.action = 'change';
             modelDiff.object = dataRowUpdated;
             writeToStream(baseStream, modelDiff);
