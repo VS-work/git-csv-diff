@@ -56,6 +56,10 @@ function _process(metaData, dataDiff, streams) {
   let modelDiff = ModelDiffUpdated.init();
 
   setMetaDataFile(modelDiff.metadata.file, metaData);
+  if(!isSchemaExists(modelDiff.metadata)) {
+    return;
+  }
+
   setMetaDataType(modelDiff.metadata);
   setMetaDataLanguage(modelDiff.metadata, metaData.fileName);
 
@@ -459,6 +463,11 @@ function setMetaDataFile(file, metaData) {
     const resourcesByPathNew = _.keyBy(metaData.datapackage.new.resources, 'path');
     file.new = resourcesByPathNew[fileName];
   }
+}
+
+function isSchemaExists(metadata) {
+  const schemaSource = metadata.file.new ? metadata.file.new : metadata.file.old;
+  return schemaSource && schemaSource.hasOwnProperty('schema');
 }
 
 function setMetaDataType(metadata) {
