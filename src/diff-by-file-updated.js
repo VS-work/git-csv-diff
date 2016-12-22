@@ -60,6 +60,10 @@ function _process(metaData, dataDiff, streams) {
     return;
   }
 
+  if(!isValidFilePath(metaData.fileName)) {
+    return;
+  }
+
   setMetaDataType(modelDiff.metadata);
   setMetaDataLanguage(modelDiff.metadata, metaData.fileName);
 
@@ -437,10 +441,19 @@ function _process(metaData, dataDiff, streams) {
 }
 
 function isDatapointFile(filename) {
-  return filename.indexOf("--datapoints--") != -1 ? true : false;
+  return filename.indexOf("--datapoints--") !== -1 ? true : false;
 }
 function isLanguageFile(filename) {
-  return filename.indexOf("lang/") != -1 ? true : false;
+  return filename.indexOf("lang/") !== -1 ? true : false;
+}
+function isValidFilePath(filename) {
+  if(
+    filename.indexOf("/") !== -1 &&
+    !isLanguageFile(filename)
+  ) {
+    return false;
+  }
+  return true;
 }
 
 function setMetaDataLanguage(metaData, fileName) {
