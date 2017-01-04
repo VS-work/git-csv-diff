@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const DIFF_STRUCTURE = {
+const MODEL_DIFF = {
   header: {
     create: [],
     remove: [],
@@ -26,7 +26,7 @@ const DIFF_STRUCTURE = {
 function modelDiff() {
   return {
     init: function() {
-      return _.cloneDeep(DIFF_STRUCTURE);
+      return _.cloneDeep(MODEL_DIFF);
     }
   };
 };

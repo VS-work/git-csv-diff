@@ -10,33 +10,6 @@ Make sure you have node.js (version 4.x.x or higher) installed on your computer.
     npm i git-csv-diff
 ```
 
-## Usage, Diff generated in Memory
-
-```bash
-
-const gitCsvDiff = require('git-csv-diff');
-
-/*
-    fileName: 'ddf--datapoints--forest_products_removal_total_dollar--by--geo--time.csv';
-    diff: {
-        from: 'state of the base file'
-        to: 'state of the target file'
-    };
-    fileModifier: 'M'/'D'/'A'
-*/
-
-let diffResult = {};
-
-gitCsvDiff.process(fileName, diff, fileModifier, function(error, result) {
-  //console.log("Files:", result.file);
-  //console.log("Changes:", result.diff);
-  diffResult[result.file] = result.diff;
-
-  gitCsvDiff.translations(diffResult);
-});
-
-```
-
 ## Usage, generate Diff partially and write result by chunk into streams
 
 ```bash

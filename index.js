@@ -1,4 +1,17 @@
 'use strict';
 
-const gitCsvDiff = require('./src/git-csv-diff');
-module.exports = gitCsvDiff;
+const diffByFile = require('./src/diff-by-file');
+
+/* Declaration */
+
+function gitCsvDiff() {};
+
+/* API */
+
+gitCsvDiff.prototype.process = function (metaData, dataDiff, streams, callback) {
+  return callback(diffByFile.process(metaData, dataDiff, streams));
+};
+
+/* Export */
+
+module.exports = new gitCsvDiff();
