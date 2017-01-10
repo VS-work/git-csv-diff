@@ -15,12 +15,13 @@ const ModelResponse = require('./model/response');
 const diffModifiers = require('./diff/modifiers');
 const diffColumns = require('./diff/columns');
 const diffStrategy = require('./diff/strategy');
+const diffHelpers = require('./diff/helpers');
 
 function diffByFile() {
   return {
     process: _process
   };
-};
+}
 
 // metaData.fileName;
 // metaData.fileModifier;
@@ -33,8 +34,7 @@ function diffByFile() {
 
 function _process(metaData, dataDiff, streams) {
 
-  const isTranslations = isLanguageFile(metaData.fileName);
-  const isDataPointsFile = isDatapointFile(metaData.fileName);
+  const isTranslations = diffHelpers.isLanguageFile(metaData.fileName);
   const baseStream = isTranslations ? streams.lang : streams.diff;
 
   /* Prepare Data Structure */
@@ -45,11 +45,7 @@ function _process(metaData, dataDiff, streams) {
   setMetaDataFile(modelResponse.metadata.file, metaData);
 
   // validate input data
-
-  if(
-    !isSchemaExists(modelResponse.metadata) ||
-    !isValidFilePath(metaData.fileName)
-  ) {
+  if(!isSchemaExists(modelResponse.metadata) || !isValidFilePath(metaData.fileName)) {
     return;
   }
 
@@ -60,24 +56,11 @@ function _process(metaData, dataDiff, streams) {
 
   /* Process Diff by Daff */
 
-  const tableFrom = new daff.Csv().makeTable(dataDiff.from);
-  const tableTo = new daff.Csv().makeTable(dataDiff.to);
+  const diffResult = initDaffDiff(dataDiff);
 
-  let filesDiff = daff.compareTables(tableFrom, tableTo).align();
-
-  let flags = new daff.CompareFlags();
-  flags.show_unchanged = true;
-  flags.show_unchanged_columns = true;
-  flags.always_show_header = true;
-
-  let diffResult = [];
-  let highlighter = new daff.TableDiff(filesDiff, flags);
-  highlighter.hilite(diffResult);
 
   /* Main flow */
 
-  const primaryKeys = getPrimaryKeys(modelResponse.metadata);
-  const primaryKey = _.first(primaryKeys);
 
   /* Head, File Columns */
   // [ 'city', 'name', 'country' ]
@@ -129,18 +112,12 @@ function _process(metaData, dataDiff, streams) {
   return;
 }
 
-function isDatapointFile(filename) {
-  return filename.indexOf("--datapoints--") !== -1 ? true : false;
-}
-function isLanguageFile(filename) {
-  return filename.indexOf("lang/") !== -1 ? true : false;
-}
 function isValidFilePath(filename) {
-  return (filename.indexOf("/") !== -1 && !isLanguageFile(filename)) ? false : true;
+  return (_.includes(filename, "/") && !diffHelpers.isLanguageFile(filename)) ? false : true;
 }
 function setMetaDataLanguage(metaData, fileName) {
   let lang = 'default';
-  if(isLanguageFile(fileName)) {
+  if(diffHelpers.isLanguageFile(fileName)) {
     const regexpRes = /lang\/(.+)\//.exec(fileName);
     lang = regexpRes[1] || lang;
   }
@@ -167,7 +144,7 @@ function setMetaDataType(metadata) {
     CONCEPTS: 'concepts',
     ENTITIES: 'entities'
   };
-  const primaryKeys = getPrimaryKeys(metadata);
+  const primaryKeys = diffHelpers.getPrimaryKeys(metadata);
 
   if (primaryKeys.length > 1)
     return metadata.type = constants.DATAPOINTS;
@@ -177,16 +154,27 @@ function setMetaDataType(metadata) {
 
   return metadata.type = constants.ENTITIES;
 }
-function getPrimaryKeys(metadata) {
-  // detect schema from `old` file if it was removed and not exists in `new`
-  const schemaSource = metadata.file.new ? metadata.file.new : metadata.file.old;
-  const primaryKeyRaw = _.clone(schemaSource.schema.primaryKey);
-
-  return _.isString(primaryKeyRaw) ? [primaryKeyRaw] : primaryKeyRaw;
-}
 function writeToStream(stream, model) {
   let modelString = JSON.stringify(model);
   stream.write(modelString + "\r\n");
-};
+}
+function initDaffDiff(dataDiff) {
+  const diffResult = [];
+
+  const tableFrom = new daff.Csv().makeTable(dataDiff.from);
+  const tableTo = new daff.Csv().makeTable(dataDiff.to);
+
+  const filesDiff = daff.compareTables(tableFrom, tableTo).align();
+
+  const flags = new daff.CompareFlags();
+  flags.show_unchanged = true;
+  flags.show_unchanged_columns = true;
+  flags.always_show_header = true;
+
+  const highlighter = new daff.TableDiff(filesDiff, flags);
+  highlighter.hilite(diffResult);
+
+  return diffResult;
+}
 
 module.exports = new diffByFile();
