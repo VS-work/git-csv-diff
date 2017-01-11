@@ -27,7 +27,7 @@ diffRowAddOne.prototype.process = function (baseStream, metaData, modelResponse,
   const isDataPointsFile = diffHelpers.isDatapointFile(metaData.fileName);
 
   diffResultColumns.forEach(function (columnValue, columnIndex) {
-    if(!diffHelpers.isColumnCreated(modelDiff, columnValue)) {
+    if(diffHelpers.isColumnCreated(modelDiff, columnValue)) {
       dataRow[columnValue] = rowValue[columnIndex];
     } else {
       dataRowOrigin[columnValue] = rowValue[columnIndex];

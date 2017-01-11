@@ -35,11 +35,11 @@ diffColumns.prototype.process = function (diffResult, modelDiff) {
 
       // added
       if (value === diffModifiers.ADD) {
-        modelDiff.header.create.push(diffColumnsRowColumns[index + 1]);
+        modelDiff.header.create.push(diffColumnsRowColumns[index]);
 
       // removed
       } else if (value === diffModifiers.REMOVE) {
-        modelDiff.header.remove.push(diffColumnsRowColumns[index + 1]);
+        modelDiff.header.remove.push(diffColumnsRowColumns[index]);
 
       // reorder (skip)
       } else if (value === diffModifiers.REORDER) {
@@ -48,7 +48,7 @@ diffColumns.prototype.process = function (diffResult, modelDiff) {
       } else {
         const oldColumn = value.substring(1, value.length - 1);
         const diffColumns = {};
-        diffColumns[diffColumnsRowColumns[index + 1]] = oldColumn;
+        diffColumns[diffColumnsRowColumns[index]] = oldColumn;
 
         modelDiff.header.update.push(diffColumns);
         modelDiff.header.remove.push(oldColumn);

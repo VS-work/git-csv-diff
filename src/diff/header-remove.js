@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 const diffModifiers = require('./modifiers');
 const diffHelpers = require('./helpers');
 
