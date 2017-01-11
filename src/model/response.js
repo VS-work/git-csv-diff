@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const DIFF_STRUCTURE_UPDATED = {
+const MODEL_RESPONSE = {
   object: null,
   metadata: {
     file: {
@@ -17,12 +17,12 @@ const DIFF_STRUCTURE_UPDATED = {
   }
 };
 
-function modelDiffUpdated() {
+function modelResponse() {
   return {
     init: function() {
-      return _.cloneDeep(DIFF_STRUCTURE_UPDATED);
+      return _.cloneDeep(MODEL_RESPONSE);
     }
   };
 };
 
-module.exports = new modelDiffUpdated();
+module.exports = new modelResponse();
