@@ -25,6 +25,21 @@ diffHelpers.prototype.isLanguageFile = function (filename) {
   return _.includes(filename, "lang/");
 };
 
+diffHelpers.prototype.writeToStream = function (stream, model) {
+  const modelString = JSON.stringify(model);
+  stream.write(modelString + "\r\n");
+};
+
+/* detect structure changes */
+
+diffHelpers.prototype.isColumnRemoved = function (modelDiff, columnValue) {
+  return _.includes(modelDiff.header.remove, columnValue);
+};
+
+diffHelpers.prototype.isColumnCreated = function (modelDiff, columnValue) {
+  return _.includes(modelDiff.header.create, columnValue);
+};
+
 /* Export */
 
 module.exports = new diffHelpers();

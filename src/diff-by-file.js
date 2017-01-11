@@ -82,28 +82,24 @@ function _process(metaData, dataDiff, streams) {
       if (modificationType !== diffModifiers.BLANK) {
         if(diffStrategy.has(modificationType)){
           const diffInstance = diffStrategy.get(modificationType);
-          diffInstance.process(modelResponse, modelDiff, diffResultColumns, rowValue);
-          writeToStream(baseStream, modelResponse);
+          diffInstance.process(baseStream, metaData, modelResponse, modelDiff, diffResultColumns, rowValue);
         }
       // if nothing changed
       } else {
         // Case: new columns were added
         if (modelDiff.header.create.length) {
           const diffInstance = diffStrategy.get(diffModifiers.COLUMN_CREATE);
-          diffInstance.process(modelResponse, modelDiff, diffResultColumns, rowValue);
-          writeToStream(baseStream, modelResponse);
+          diffInstance.process(baseStream, metaData, modelResponse, modelDiff, diffResultColumns, rowValue);
         }
         // Case: columns were renamed
         if (modelDiff.header.update.length) {
           const diffInstance = diffStrategy.get(diffModifiers.COLUMN_UPDATE);
-          diffInstance.process(modelResponse, modelDiff, diffResultColumns, rowValue);
-          writeToStream(baseStream, modelResponse);
+          diffInstance.process(baseStream, metaData, modelResponse, modelDiff, diffResultColumns, rowValue);
         }
         // Case: columns were removed
         if (modelDiff.header.remove.length) {
           const diffInstance = diffStrategy.get(diffModifiers.COLUMN_REMOVE);
-          diffInstance.process(modelResponse, modelDiff, diffResultColumns, rowValue);
-          writeToStream(baseStream, modelResponse);
+          diffInstance.process(baseStream, metaData, modelResponse, modelDiff, diffResultColumns, rowValue);
         }
       }
     });
@@ -115,6 +111,7 @@ function _process(metaData, dataDiff, streams) {
 function isValidFilePath(filename) {
   return (_.includes(filename, "/") && !diffHelpers.isLanguageFile(filename)) ? false : true;
 }
+
 function setMetaDataLanguage(metaData, fileName) {
   let lang = 'default';
   if(diffHelpers.isLanguageFile(fileName)) {
@@ -123,6 +120,7 @@ function setMetaDataLanguage(metaData, fileName) {
   }
   metaData.lang = lang;
 }
+
 function setMetaDataFile(file, metaData) {
   const fileName = path.parse(metaData.fileName).base;
   const resourcesByPathOld = _.keyBy(metaData.datapackage.old.resources, 'path');
@@ -134,10 +132,12 @@ function setMetaDataFile(file, metaData) {
     file.new = resourcesByPathNew[fileName];
   }
 }
+
 function isSchemaExists(metadata) {
   const schemaSource = metadata.file.new ? metadata.file.new : metadata.file.old;
   return schemaSource && schemaSource.hasOwnProperty('schema');
 }
+
 function setMetaDataType(metadata) {
   const constants = {
     DATAPOINTS: 'datapoints',
@@ -154,10 +154,7 @@ function setMetaDataType(metadata) {
 
   return metadata.type = constants.ENTITIES;
 }
-function writeToStream(stream, model) {
-  let modelString = JSON.stringify(model);
-  stream.write(modelString + "\r\n");
-}
+
 function initDaffDiff(dataDiff) {
   const diffResult = [];
 
