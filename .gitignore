@@ -3,5 +3,6 @@
 *.log
 node_modules
 repos/*
+test/e2e/result/*.txt
 result-diff-lang.txt
 result-diff.txt
