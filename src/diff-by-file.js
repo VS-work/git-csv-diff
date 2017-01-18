@@ -57,8 +57,7 @@ function _process(metaData, dataDiff, streams) {
   /* Process Diff by Daff */
 
   const diffResult = initDaffDiff(dataDiff);
-  console.log(diffResult);
-  asdasd_stop();
+  // console.log(diffResult);
 
   /* Main flow */
 
