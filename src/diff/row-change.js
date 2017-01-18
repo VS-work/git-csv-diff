@@ -93,9 +93,10 @@ diffRowChange.prototype.process = function (baseStream, metaData, modelResponse,
     diffHelpers.writeToStream(baseStream, modelResponse);
 
     // `create` action
-    modelResponse.metadata.action = 'create';
-    modelResponse.object = dataRowLang;
-    diffHelpers.writeToStream(baseStream, modelResponse);
+    const modelResponseSecond = _.cloneDeep(modelResponse);
+    modelResponseSecond.metadata.action = 'create';
+    modelResponseSecond.object = dataRowLang;
+    diffHelpers.writeToStream(baseStream, modelResponseSecond);
 
   } else {
     // default flow

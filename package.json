@@ -21,7 +21,9 @@
   "homepage": "https://github.com/VS-work/git-csv-diff#readme",
   "scripts": {
     "start": "node index.js",
-    "test": "./node_modules/.bin/mocha test/**/*.js --reporter spec"
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:e2e": "./node_modules/.bin/mocha test/e2e/*.js --reporter spec",
+    "test:unit": "istanbul cover _mocha -- -R spec 'test/unit/*.spec.js'"
   },
   "dependencies": {
     "async": "2.1.2",
@@ -30,8 +32,10 @@
   },
   "devDependencies": {
     "async": "2.1.2",
-    "byline": "^5.0.0",
+    "byline": "5.0.0",
     "chai": "3.5.0",
-    "mocha": "3.2.0"
+    "istanbul": "0.4.5",
+    "mocha": "3.2.0",
+    "sinon": "^1.17.7"
   }
 }

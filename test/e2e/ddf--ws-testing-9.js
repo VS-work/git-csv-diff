@@ -13,7 +13,7 @@ const filesCount = 4;
 
 const gitCsvDiff = require("../../index");
 
-describe("Repo: ddf--ws-testing || feat(translations): remove anno dimension from datapoints and translations files", function() {
+describe("e2e: ddf--ws-testing || feat(translations): remove anno dimension from datapoints and translations files", function() {
   it("compare diff", function(done) {
 
     const dataPackage = require(`./data/commit-${iterationIndex}-datapackage`);

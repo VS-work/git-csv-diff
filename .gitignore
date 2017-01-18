@@ -3,6 +3,7 @@
 *.log
 node_modules
 repos/*
+coverage/*
 test/e2e/result/*.txt
 result-diff-lang.txt
 result-diff.txt

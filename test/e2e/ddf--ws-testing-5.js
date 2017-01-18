@@ -13,7 +13,7 @@ const filesCount = 2;
 
 const gitCsvDiff = require("../../index");
 
-describe("Repo: ddf--ws-testing || feat(datapoints): update datapoints values and translations", function() {
+describe("e2e: ddf--ws-testing || feat(datapoints): update datapoints values and translations", function() {
   it("compare diff", function(done) {
 
     const dataPackage = require(`./data/commit-${iterationIndex}-datapackage`);

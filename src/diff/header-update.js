@@ -46,10 +46,8 @@ diffHeaderUpdate.prototype.process = function (baseStream, metaData, modelRespon
         dataRowOrigin[columnValueOld] = valueCell;
       }
     } else {
-      // and not removed
-      if(!diffHelpers.isColumnRemoved(modelDiff, columnValue)) {
-        dataRow[columnValue] = valueCell;
-      }
+      // new values for added columns
+      dataRow[columnValue] = valueCell;
     }
   });
 

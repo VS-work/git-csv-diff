@@ -1,5 +1,7 @@
 'use strict';
 
+const _ = require('lodash');
+
 const diffModifiers = require('./modifiers');
 const diffHelpers = require('./helpers');
 
@@ -24,7 +26,7 @@ diffRowAdd.prototype.process = function (baseStream, metaData, modelResponse, mo
     }
   });
 
-  if (dataRow) {
+  if (!_.isEmpty(dataRow)) {
     modelResponse.metadata.action = 'create';
     modelResponse.object = dataRow;
 

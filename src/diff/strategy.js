@@ -28,7 +28,6 @@ diffStrategy.prototype.get = function (type) {
   if(this.has(type)) {
     return this._strategies[type];
   }
-  console.error(`Error: diffStrategy with type "${type}" is not defined`);
   return false;
 };
 
