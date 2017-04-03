@@ -71,6 +71,10 @@ describe("Unit Test || diff/header-create.js", function () {
         },
         "object": {
           "column 2": "test 2",
+          "data-origin": {
+            "column 2": "test 2",
+            "column 3": "test 3"
+          },
           "data-update": {
             "column 1": "test 1"
           },

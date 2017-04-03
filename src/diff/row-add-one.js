@@ -24,8 +24,6 @@ diffRowAddOne.prototype.process = function (baseStream, metaData, modelResponse,
   const primaryKey = _.first(primaryKeys);
   const primaryKeyIndex = diffResultColumns.indexOf(primaryKey);
 
-  const isDataPointsFile = diffHelpers.isDatapointFile(metaData.fileName);
-
   diffResultColumns.forEach(function (columnValue, columnIndex) {
     if(diffHelpers.isColumnCreated(modelDiff, columnValue)) {
       dataRow[columnValue] = rowValue[columnIndex];
@@ -38,10 +36,7 @@ diffRowAddOne.prototype.process = function (baseStream, metaData, modelResponse,
   dataRowUpdated["gid"] = primaryKey;
   dataRowUpdated[primaryKey] = rowValue[primaryKeyIndex];
   dataRowUpdated["data-update"] = dataRow;
-
-  if (isDataPointsFile) {
-    dataRowUpdated["data-origin"] = dataRowOrigin;
-  }
+  dataRowUpdated["data-origin"] = dataRowOrigin;
 
   modelResponse.metadata.action = 'update';
   modelResponse.object = dataRowUpdated;
