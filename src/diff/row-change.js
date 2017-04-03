@@ -46,10 +46,8 @@ diffRowChange.prototype.process = function (baseStream, metaData, modelResponse,
 
     } else {
 
-      if (isDataPointsFile) {
-        if(!diffHelpers.isColumnCreated(modelDiff, columnValue)) {
-          dataRowOrigin[columnValue] = valueCell;
-        }
+      if(!diffHelpers.isColumnCreated(modelDiff, columnValue)) {
+        dataRowOrigin[columnValue] = valueCell;
       }
       // check if not removed column
       if(!diffHelpers.isColumnRemoved(modelDiff, columnValue)) {
@@ -75,11 +73,7 @@ diffRowChange.prototype.process = function (baseStream, metaData, modelResponse,
   dataRowUpdated["gid"] = primaryKey;
   dataRowUpdated[primaryKey] = conceptValueSearchFor;
   dataRowUpdated["data-update"] = dataRow;
-
-  if (isDataPointsFile) {
-    dataRowUpdated["data-origin"] = dataRowOrigin;
-  }
-
+  dataRowUpdated["data-origin"] = dataRowOrigin;
   // custom flow for translations with changed gid (split `change` to `remove` + `create`)
 
   if(isTranslations && gidChangeDetection && !isDataPointsFile) {
@@ -87,6 +81,7 @@ diffRowChange.prototype.process = function (baseStream, metaData, modelResponse,
     const dataRowRemoved = {};
     dataRowRemoved['gid'] = primaryKey;
     dataRowRemoved[primaryKey] = conceptValueSearchFor;
+    dataRowRemoved["data-origin"] = dataRowOrigin;
 
     modelResponse.metadata.action = 'remove';
     modelResponse.object = dataRowRemoved;

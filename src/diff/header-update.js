@@ -24,8 +24,6 @@ diffHeaderUpdate.prototype.process = function (baseStream, metaData, modelRespon
   const primaryKey = _.first(primaryKeys);
   const primaryKeyIndex = diffResultColumns.indexOf(primaryKey);
 
-  const isDataPointsFile = diffHelpers.isDatapointFile(metaData.fileName);
-
   rowValue.forEach(function (valueCell, indexCell) {
     const columnValue = diffResultColumns[indexCell];
 
@@ -42,9 +40,7 @@ diffHeaderUpdate.prototype.process = function (baseStream, metaData, modelRespon
         dataRow[columnValue] = valueCell;
       }
 
-      if (isDataPointsFile) {
-        dataRowOrigin[columnValueOld] = valueCell;
-      }
+      dataRowOrigin[columnValueOld] = valueCell;
     } else {
       // new values for added columns
       dataRow[columnValue] = valueCell;
@@ -55,10 +51,7 @@ diffHeaderUpdate.prototype.process = function (baseStream, metaData, modelRespon
   dataRowChanged["gid"] = primaryKey;
   dataRowChanged[primaryKey] = rowValue[primaryKeyIndex];
   dataRowChanged["data-update"] = dataRow;
-
-  if (isDataPointsFile) {
-    dataRowChanged["data-origin"] = dataRowOrigin;
-  }
+  dataRowChanged["data-origin"] = dataRowOrigin;
 
   modelResponse.metadata.action = 'change';
   modelResponse.object = dataRowChanged;

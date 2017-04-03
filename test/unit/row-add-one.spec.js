@@ -71,6 +71,10 @@ describe("Unit Test || diff/row-add-one.js", function () {
         "object": {
           "gid": "column 2",
           "column 2": "test 2",
+          "data-origin": {
+            "column 1": "test 1",
+            "column 2": "test 2"
+          },
           "data-update": {
             "column 3": "test 3"
           }
@@ -167,6 +171,11 @@ describe("Unit Test || diff/row-add-one.js", function () {
         "object": {
           "gid": "column 2",
           "column 2": "test 2",
+          "data-origin": {
+            "column 1": "test 1",
+            "column 2": "test 2",
+            "column 3": "test 3"
+          },
           "data-update": {}
         }
       };

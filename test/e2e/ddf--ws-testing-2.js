@@ -68,7 +68,6 @@ describe("e2e: ddf--ws-testing || chore(update): change entities and datapoints"
           const streamReadTranslation = byline(fs.createReadStream(resultFileLangName, { encoding: 'utf8' }));
 
           streamReadTranslation.on('data', function(line) {
-            // if(rowCounter == 2) { line += '!'; }
             expect(line).to.eql(diffFixtureTranslationRows[rowCounter]);
             rowCounter++;
           });

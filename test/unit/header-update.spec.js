@@ -76,6 +76,10 @@ describe("Unit Test || diff/header-update.js", function () {
             "column 1": "test 1",
             "column 2": "test 2"
           },
+          "data-origin": {
+            "column 3": "test 3",
+            "column 4": "test 2"
+          },
           "gid": "column 2"
         }
       };

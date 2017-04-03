@@ -83,6 +83,12 @@ describe("Unit Test || diff/row-change.js", function () {
         "object": {
           "gid": "column 1",
           "column 1": "test 1",
+          "data-origin": {
+            "column 1": "test 1",
+            "column 2": "test 2",
+            "column 3": "test 3",
+            "column 4": "test 4"
+          },
           "data-update": {
             "column 1": "test 1",
             "column 2": "test 5",
@@ -133,6 +139,11 @@ describe("Unit Test || diff/row-change.js", function () {
         "object": {
           "gid": "column 1",
           "column 1": "test 1",
+          "data-origin": {
+            "column 1": "test 1",
+            "column 2": "test 2",
+            "column 4": "test 4"
+          },
           "data-update": {
             "column 1": "test 1",
             "column 2": "test 5",
@@ -292,6 +303,12 @@ describe("Unit Test || diff/row-change.js", function () {
         "object": {
           "gid": "column 1",
           "column 1": "test 1",
+          "data-origin": {
+            "column 1": "test 1",
+            "column 2": "test 2",
+            "column 3": "test 3",
+            "column 4": "test 4"
+          },
           "data-update": {
             "column 1": "test 1",
             "column 2": "test 5",
@@ -395,7 +412,13 @@ describe("Unit Test || diff/row-change.js", function () {
         },
         "object": {
           "column 2": "test 2",
-          "gid": "column 2"
+          "gid": "column 2",
+          "data-origin": {
+            "column 1": "test 1",
+            "column 2": "test 2",
+            "column 3": "test 3",
+            "column 4": "test 4"
+          }
         }
       };
       const resultFixtureSecond = {

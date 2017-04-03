@@ -16,32 +16,48 @@ diffRowRemove.prototype.getType = function () {
 };
 
 diffRowRemove.prototype.process = function (baseStream, metaData, modelResponse, modelDiff, diffResultColumns, rowValue) {
-
-  const dataRow = {};
   const isDataPointsFile = diffHelpers.isDatapointFile(metaData.fileName);
 
-  const primaryKeys = diffHelpers.getPrimaryKeys(modelResponse.metadata);
-  const primaryKey = _.first(primaryKeys);
-  const primaryKeyIndex = diffResultColumns.indexOf(primaryKey);
-
-  // check that file with datapoints
-  if (isDataPointsFile) {
-    diffResultColumns.forEach(function (columnValue, columnIndex) {
-      if(!diffHelpers.isColumnCreated(modelDiff, columnValue)) {
-        // ready columns
-        dataRow[columnValue] = rowValue[columnIndex];
-      }
-    });
-  } else {
-    dataRow['gid'] = primaryKey;
-    dataRow[primaryKey] = rowValue[primaryKeyIndex];
-  }
+  const primaryKey = _.first(diffHelpers.getPrimaryKeys(modelResponse.metadata));
+  const primaryKeyIndex = _.indexOf(diffResultColumns, primaryKey);
 
   modelResponse.metadata.action = 'remove';
-  modelResponse.object = dataRow;
+  modelResponse.object = getDataRow({
+    diffResultColumns,
+    rowValue,
+    modelDiff,
+    primaryKeyIndex,
+    primaryKey,
+    isDataPointsFile
+  });
 
   diffHelpers.writeToStream(baseStream, modelResponse);
 };
+
+function getDataRow(options) {
+  const { primaryKey, isDataPointsFile, primaryKeyIndex, rowValue } = options;
+
+  if (isDataPointsFile) {
+    return getRowWithColumnsFrom(options);
+  }
+
+  return {
+    gid: primaryKey,
+    [primaryKey]: rowValue[primaryKeyIndex],
+    'data-origin': getRowWithColumnsFrom(options)
+  };
+}
+
+function getRowWithColumnsFrom(options) {
+  const { diffResultColumns, modelDiff, rowValue } = options;
+
+  return diffResultColumns.reduce(function (result, columnValue, columnIndex) {
+      if (!diffHelpers.isColumnCreated(modelDiff, columnValue)) {
+        result[columnValue] = rowValue[columnIndex];
+      }
+      return result;
+  }, {});
+}
 
 /* Export */
 
