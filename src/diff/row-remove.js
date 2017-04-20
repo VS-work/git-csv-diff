@@ -16,7 +16,7 @@ diffRowRemove.prototype.getType = function () {
 };
 
 diffRowRemove.prototype.process = function (baseStream, metaData, modelResponse, modelDiff, diffResultColumns, rowValue) {
-  const isDataPointsFile = diffHelpers.isDatapointFile(metaData.fileName);
+  const isDataPointsFile = diffHelpers.isDatapointFile(metaData);
 
   const primaryKey = _.first(diffHelpers.getPrimaryKeys(modelResponse.metadata));
   const primaryKeyIndex = _.indexOf(diffResultColumns, primaryKey);

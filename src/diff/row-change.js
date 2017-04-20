@@ -25,7 +25,7 @@ diffRowChange.prototype.process = function (baseStream, metaData, modelResponse,
   const primaryKey = _.first(primaryKeys);
   const primaryKeyIndex = diffResultColumns.indexOf(primaryKey);
 
-  const isDataPointsFile = diffHelpers.isDatapointFile(metaData.fileName);
+  const isDataPointsFile = diffHelpers.isDatapointFile(metaData);
   const isTranslations = diffHelpers.isLanguageFile(metaData.fileName);
 
   rowValue.forEach(function (valueCell, indexCell) {

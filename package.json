@@ -23,7 +23,7 @@
     "start": "node index.js",
     "test": "npm run test:unit && npm run test:e2e",
     "test:e2e": "./node_modules/.bin/mocha test/e2e/*.js --reporter spec",
-    "test:unit": "istanbul cover _mocha -- -R spec 'test/unit/*.spec.js'"
+    "test:unit": "istanbul --include-all-sources cover _mocha -- -R spec 'test/unit/*.spec.js'"
   },
   "dependencies": {
     "async": "2.1.2",

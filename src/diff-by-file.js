@@ -17,12 +17,6 @@ const diffColumns = require('./diff/columns');
 const diffStrategy = require('./diff/strategy');
 const diffHelpers = require('./diff/helpers');
 
-function diffByFile() {
-  return {
-    process: _process
-  };
-}
-
 // metaData.fileName;
 // metaData.fileModifier;
 
@@ -32,7 +26,14 @@ function diffByFile() {
 // streams.diff;
 // streams.lang;
 
+module.exports = {
+  process: _process,
+  _splitPrimaryKeysByPathToOldAndNew: splitPrimaryKeysByPathToOldAndNew
+};
+
 function _process(metaData, dataDiff, streams) {
+
+  metaData = Object.assign({}, metaData, splitPrimaryKeysByPathToOldAndNew(metaData));
 
   const isTranslations = diffHelpers.isLanguageFile(metaData.fileName);
   const baseStream = isTranslations ? streams.lang : streams.diff;
@@ -45,7 +46,7 @@ function _process(metaData, dataDiff, streams) {
   setMetaDataFile(modelResponse.metadata.file, metaData);
 
   // validate input data
-  if(!isSchemaExists(modelResponse.metadata) || !isValidFilePath(metaData.fileName)) {
+  if (!isSchemaExists(modelResponse.metadata) || !isValidFilePath(metaData.fileName)) {
     return;
   }
 
@@ -80,11 +81,11 @@ function _process(metaData, dataDiff, streams) {
 
       // check that something was changed
       if (modificationType !== diffModifiers.BLANK) {
-        if(diffStrategy.has(modificationType)){
+        if (diffStrategy.has(modificationType)) {
           const diffInstance = diffStrategy.get(modificationType);
           diffInstance.process(baseStream, metaData, modelResponse, modelDiff, diffResultColumns, rowValue);
         }
-      // if nothing changed
+        // if nothing changed
       } else {
         // Case: new columns were added
         if (modelDiff.header.create.length) {
@@ -114,7 +115,7 @@ function isValidFilePath(filename) {
 
 function setMetaDataLanguage(metaData, fileName) {
   let lang = 'default';
-  if(diffHelpers.isLanguageFile(fileName)) {
+  if (diffHelpers.isLanguageFile(fileName)) {
     const regexpRes = /lang\/(.+)\//.exec(fileName);
     lang = regexpRes[1] || lang;
   }
@@ -127,7 +128,7 @@ function setMetaDataFile(file, metaData) {
   file.old = resourcesByPathOld[fileName];
 
   // info is not available if file was removed
-  if(metaData.fileModifier != "D") {
+  if (metaData.fileModifier != "D") {
     const resourcesByPathNew = _.keyBy(metaData.datapackage.new.resources, 'path');
     file.new = resourcesByPathNew[fileName];
   }
@@ -174,4 +175,18 @@ function initDaffDiff(dataDiff) {
   return diffResult;
 }
 
-module.exports = new diffByFile();
+function splitPrimaryKeysByPathToOldAndNew(metadata) {
+  return {
+    primaryKeyByPath: {
+      old: convertResourcesToPrimaryKeyByPath(_.get(metadata, 'datapackage.old.resources')),
+      new: convertResourcesToPrimaryKeyByPath(_.get(metadata, 'datapackage.new.resources'))
+    }
+  };
+}
+
+function convertResourcesToPrimaryKeyByPath(resources) {
+  return _.reduce(resources, (result, resource) => {
+    result[resource.path] = resource.schema.primaryKey;
+    return result;
+  }, {});
+}

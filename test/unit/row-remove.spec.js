@@ -31,6 +31,11 @@ describe("Unit Test || diff/row-remove.js", function () {
       fileName: 'ddf--concepts.csv'
     };
     const metaDataDatapoint = {
+      primaryKeyByPath: {
+        new: {
+          'ddf--datapoints--lines.csv': ['bla', 'bla']
+        }
+      },
       file: {old: {schema: {primaryKey: 'column 1'}}, new: {schema: {primaryKey: 'column 2'}}},
       fileName: 'ddf--datapoints--lines.csv'
     };

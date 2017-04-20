@@ -17,8 +17,15 @@ diffHelpers.prototype.getPrimaryKeys = function (metadata) {
 };
 
 
-diffHelpers.prototype.isDatapointFile = function (filename) {
-  return _.includes(filename, "--datapoints--");
+diffHelpers.prototype.isDatapointFile = function (metadata) {
+  const fileName = this.isLanguageFile(metadata.fileName) ? _.last(_.split(metadata.fileName, '/')) : metadata.fileName;
+
+  const primaryKeyByPath = _.get(metadata, 'primaryKeyByPath');
+  const newPrimaryKey = _.get(primaryKeyByPath, ['new', fileName]);
+  const oldPrimaryKey = _.get(primaryKeyByPath, ['old', fileName]);
+
+  const primaryKey = newPrimaryKey || oldPrimaryKey;
+  return _.isArray(primaryKey) && primaryKey.length > 1;
 };
 
 diffHelpers.prototype.isLanguageFile = function (filename) {
