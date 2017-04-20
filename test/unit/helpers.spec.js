@@ -76,29 +76,114 @@ describe("Unit Test || diff/helpers.js", function () {
   });
 
   describe("API::isDatapointFile", function () {
+    it("should return correct result for datapoint file: taken from new datapackage", function () {
+      const metadata = {
+        fileName: 'ddf--datapoints--lines_of_code--by--company--project--anno.csv',
+        primaryKeyByPath: {
+          new: {
+            'ddf--datapoints--lines_of_code--by--company--project--anno.csv': ['company', 'project', 'anno']
+          }
+        }
+      };
 
-    it("should return correct result for datapoint file", function (done) {
-
-      const input = 'ddf--datapoints--lines_of_code--by--company--project--anno.csv';
-      const resultFixture = true;
-
-      const result = testFile.isDatapointFile(input);
-      expect(result).to.deep.equal(resultFixture);
-
-      done();
+      expect(testFile.isDatapointFile(metadata)).to.equal(true);
     });
 
-    it("should return correct result for non-datapoint file", function (done) {
+    it("should return correct result for datapoint file: taken from old datapackage", function () {
+      const metadata = {
+        fileName: 'ddf--datapoints--lines_of_code--by--company--project--anno.csv',
+        primaryKeyByPath: {
+          old: {
+            'ddf--datapoints--lines_of_code--by--company--project--anno.csv': ['company', 'project', 'anno']
+          }
+        }
+      };
 
-      const input = 'ddf--concepts.csv';
-      const resultFixture = false;
-
-      const result = testFile.isDatapointFile(input);
-      expect(result).to.deep.equal(resultFixture);
-
-      done();
+      expect(testFile.isDatapointFile(metadata)).to.equal(true);
     });
 
+    it("should return correct result for datapoint file: new datapackage has priority over the old datapackage", function () {
+      const metadata = {
+        fileName: 'ddf--datapoints--lines_of_code--by--company--project--anno.csv',
+        primaryKeyByPath: {
+          old: {
+            'ddf--datapoints--lines_of_code--by--company--project--anno.csv': []
+          },
+          new: {
+            'ddf--datapoints--lines_of_code--by--company--project--anno.csv': ['company', 'project', 'anno']
+          },
+        }
+      };
+
+      expect(testFile.isDatapointFile(metadata)).to.equal(true);
+    });
+
+    it("should return correct result for datapoint file: datapoints translations are also included", function () {
+      const metadata = {
+        fileName: 'lang/path/ddf--datapoints--lines_of_code--by--company--project--anno.csv',
+        primaryKeyByPath: {
+          new: {
+            'ddf--datapoints--lines_of_code--by--company--project--anno.csv': ['company', 'project', 'anno']
+          }
+        }
+      };
+
+      expect(testFile.isDatapointFile(metadata)).to.equal(true);
+    });
+
+    it("should detect when a file is not about datapoints: primaryKey is a single non-array value", function () {
+      const metadata = {
+        fileName: 'lang/path/ddf--datapoints--lines_of_code--by--company--project--anno.csv',
+        primaryKeyByPath: {
+          new: {
+            'ddf--datapoints--lines_of_code--by--company--project--anno.csv': 'company'
+          }
+        }
+      };
+
+      expect(testFile.isDatapointFile(metadata)).to.deep.equal(false);
+    });
+
+    it("should detect when a file is not about datapoints: primaryKey is null", function () {
+      const metadata = {
+        fileName: 'lang/path/ddf--datapoints--lines_of_code--by--company--project--anno.csv',
+        primaryKeyByPath: {
+          new: {
+            'ddf--datapoints--lines_of_code--by--company--project--anno.csv': null
+          }
+        }
+      };
+
+      expect(testFile.isDatapointFile(metadata)).to.deep.equal(false);
+    });
+
+    it("should detect when a file is not about datapoints: primaryKey is an array with a single value", function () {
+      const metadata = {
+        fileName: 'lang/path/ddf--datapoints--lines_of_code--by--company--project--anno.csv',
+        primaryKeyByPath: {
+          new: {
+            'ddf--datapoints--lines_of_code--by--company--project--anno.csv': ['bla']
+          }
+        }
+      };
+
+      expect(testFile.isDatapointFile(metadata)).to.deep.equal(false);
+    });
+
+    it("should not treat file as a datapoints' one when there is not enough info in metadata to detect this: there are no new and old primary keys by path", function () {
+      const metadata = {
+        fileName: 'lang/path/ddf--datapoints--lines_of_code--by--company--project--anno.csv',
+        primaryKeyByPath: {}
+      };
+      expect(testFile.isDatapointFile(metadata)).to.deep.equal(false);
+    });
+
+    it("should not treat file as a datapoints' one when there is not enough info in metadata to detect this: there is no primary keys by path property", function () {
+      const metadata = {
+        fileName: 'lang/path/ddf--datapoints--lines_of_code--by--company--project--anno.csv',
+      };
+      expect(testFile.isDatapointFile(metadata)).to.deep.equal(false);
+    });
   });
 
   describe("API::isLanguageFile", function () {

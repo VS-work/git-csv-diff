@@ -31,6 +31,11 @@ describe("Unit Test || diff/header-remove.js", function () {
       fileName: 'ddf--concepts.csv'
     };
     const metaDataDatapoint = {
+      primaryKeyByPath: {
+        new: {
+          'ddf--datapoints--lines.csv': ['bla', 'bla']
+        },
+      },
       file: {old: {schema: {primaryKey: 'column 1'}}, new: {schema: {primaryKey: 'column 2'}}},
       fileName: '/lang/nl-nl/ddf--datapoints--lines.csv'
     };
@@ -99,7 +104,7 @@ describe("Unit Test || diff/header-remove.js", function () {
       };
 
       testFile.process(baseStream, metaDataDatapoint, modelResponse, modelDiff, diffResultColumns, rowValue);
-      expect(diffHelpersStub.calledOnce).to.equal(true);
+      sinon.assert.calledOnce(diffHelpersStub);
       expect(diffHelpersStub.getCall(0).args[1]).to.deep.equal(resultFixture);
 
       diffHelpers.writeToStream.restore();
