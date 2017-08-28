@@ -17,8 +17,8 @@ const diffColumns = require('./diff/columns');
 const diffStrategy = require('./diff/strategy');
 const diffHelpers = require('./diff/helpers');
 
-// metaData.fileName;
-// metaData.fileModifier;
+// metadata.fileName;
+// metadata.fileModifier;
 
 // dataDiff.from;
 // dataDiff.to;
@@ -31,11 +31,12 @@ module.exports = {
   _splitPrimaryKeysByPathToOldAndNew: splitPrimaryKeysByPathToOldAndNew
 };
 
-function _process(metaData, dataDiff, streams) {
+function _process(metadata, dataDiff, streams) {
 
-  metaData = Object.assign({}, metaData, splitPrimaryKeysByPathToOldAndNew(metaData));
+  metadata = Object.assign({}, metadata, splitPrimaryKeysByPathToOldAndNew(metadata));
+  console.log('Processing file: ', metadata.fileName);
 
-  const isTranslations = diffHelpers.isLanguageFile(metaData.fileName);
+  const isTranslations = diffHelpers.isLanguageFile(metadata.fileName);
   const baseStream = isTranslations ? streams.lang : streams.diff;
 
   /* Prepare Data Structure */
@@ -43,22 +44,22 @@ function _process(metaData, dataDiff, streams) {
   let modelDiff = ModelDiff.init();
   let modelResponse = ModelResponse.init();
 
-  setMetaDataFile(modelResponse.metadata.file, metaData);
+  // setup response meta data - DON'T CHANGE THE ORDER
+  setMetaDataLanguage(modelResponse.metadata, metadata);
+  setMetaDataFile(modelResponse.metadata, metadata);
+  setMetaDataType(modelResponse.metadata, metadata);
 
   // validate input data
-  if (!isSchemaExists(modelResponse.metadata) || !isValidFilePath(metaData.fileName)) {
-    return;
+
+  if (!isSchemaExists(modelResponse.metadata)) {
+    console.error('Given schema doesn\'t exist!', JSON.stringify(modelResponse.metadata, null, '\t'));
+    throw new Error(`Given schema doesn\'t exist!\n${JSON.stringify(modelResponse.metadata, null, '\t')}`);
   }
-
-  // setup response meta data
-
-  setMetaDataType(modelResponse.metadata);
-  setMetaDataLanguage(modelResponse.metadata, metaData.fileName);
 
   /* Process Diff by Daff */
 
   const diffResult = initDaffDiff(dataDiff);
-  // console.log(diffResult);
+  console.log(diffResult);
 
   /* Main flow */
 
@@ -68,7 +69,7 @@ function _process(metaData, dataDiff, streams) {
   const diffResultColumns = diffColumns.process(diffResult, modelDiff);
 
   // setup `removedColumns` for files that are not removed
-  if (metaData.fileModifier != "D") {
+  if (metadata.fileModifier != "D") {
     modelResponse.metadata.removedColumns = _.clone(modelDiff.header.remove);
   }
 
@@ -83,24 +84,24 @@ function _process(metaData, dataDiff, streams) {
       if (modificationType !== diffModifiers.BLANK) {
         if (diffStrategy.has(modificationType)) {
           const diffInstance = diffStrategy.get(modificationType);
-          diffInstance.process(baseStream, metaData, modelResponse, modelDiff, diffResultColumns, rowValue);
+          diffInstance.process(baseStream, metadata, modelResponse, modelDiff, diffResultColumns, rowValue);
         }
         // if nothing changed
       } else {
         // Case: new columns were added
         if (modelDiff.header.create.length) {
           const diffInstance = diffStrategy.get(diffModifiers.COLUMN_CREATE);
-          diffInstance.process(baseStream, metaData, modelResponse, modelDiff, diffResultColumns, rowValue);
+          diffInstance.process(baseStream, metadata, modelResponse, modelDiff, diffResultColumns, rowValue);
         }
         // Case: columns were renamed
         if (modelDiff.header.update.length) {
           const diffInstance = diffStrategy.get(diffModifiers.COLUMN_UPDATE);
-          diffInstance.process(baseStream, metaData, modelResponse, modelDiff, diffResultColumns, rowValue);
+          diffInstance.process(baseStream, metadata, modelResponse, modelDiff, diffResultColumns, rowValue);
         }
         // Case: columns were removed
         if (modelDiff.header.remove.length) {
           const diffInstance = diffStrategy.get(diffModifiers.COLUMN_REMOVE);
-          diffInstance.process(baseStream, metaData, modelResponse, modelDiff, diffResultColumns, rowValue);
+          diffInstance.process(baseStream, metadata, modelResponse, modelDiff, diffResultColumns, rowValue);
         }
       }
     });
@@ -109,28 +110,26 @@ function _process(metaData, dataDiff, streams) {
   return;
 }
 
-function isValidFilePath(filename) {
-  return (_.includes(filename, "/") && !diffHelpers.isLanguageFile(filename)) ? false : true;
-}
-
-function setMetaDataLanguage(metaData, fileName) {
+function setMetaDataLanguage(metadataModel, metadata) {
   let lang = 'default';
+  const fileName = metadata.fileName;
   if (diffHelpers.isLanguageFile(fileName)) {
     const regexpRes = /lang\/(.+)\//.exec(fileName);
     lang = regexpRes[1] || lang;
   }
-  metaData.lang = lang;
+
+  _.extend(metadataModel, {lang});
 }
 
-function setMetaDataFile(file, metaData) {
-  const fileName = path.parse(metaData.fileName).base;
-  const resourcesByPathOld = _.keyBy(metaData.datapackage.old.resources, 'path');
-  file.old = resourcesByPathOld[fileName];
+function setMetaDataFile(metadataModel, metadata) {
+  const fileName = diffHelpers.getOriginalFileName(metadata.fileName, metadataModel.lang);
+  const resourcesByPathOld = _.keyBy(metadata.datapackage.old.resources, 'path');
+  metadataModel.file.old = resourcesByPathOld[fileName];
 
   // info is not available if file was removed
-  if (metaData.fileModifier != "D") {
-    const resourcesByPathNew = _.keyBy(metaData.datapackage.new.resources, 'path');
-    file.new = resourcesByPathNew[fileName];
+  if (metadata.fileModifier != "D") {
+    const resourcesByPathNew = _.keyBy(metadata.datapackage.new.resources, 'path');
+    metadataModel.file.new = resourcesByPathNew[fileName];
   }
 }
 
@@ -139,21 +138,21 @@ function isSchemaExists(metadata) {
   return schemaSource && schemaSource.hasOwnProperty('schema');
 }
 
-function setMetaDataType(metadata) {
+function setMetaDataType(metadataModel, metadata) {
   const constants = {
     DATAPOINTS: 'datapoints',
     CONCEPTS: 'concepts',
     ENTITIES: 'entities'
   };
-  const primaryKeys = diffHelpers.getPrimaryKeys(metadata);
+  const primaryKeys = diffHelpers.getPrimaryKeys(metadataModel);
 
   if (primaryKeys.length > 1)
-    return metadata.type = constants.DATAPOINTS;
+    return metadataModel.type = constants.DATAPOINTS;
 
   if (_.includes(constants.CONCEPTS, _.first(primaryKeys)))
-    return metadata.type = constants.CONCEPTS;
+    return metadataModel.type = constants.CONCEPTS;
 
-  return metadata.type = constants.ENTITIES;
+  return metadataModel.type = constants.ENTITIES;
 }
 
 function initDaffDiff(dataDiff) {

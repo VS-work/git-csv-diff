@@ -26,16 +26,16 @@
     "test:unit": "istanbul --include-all-sources cover _mocha -- -R spec 'test/unit/**/*.spec.js'"
   },
   "dependencies": {
-    "async": "2.1.2",
+    "async": "2.5.0",
     "daff": "1.3.25",
-    "lodash": "4.16.6"
+    "lodash": "4.17.4"
   },
   "devDependencies": {
-    "async": "2.4.0",
+    "async": "2.5.0",
     "byline": "5.0.0",
     "chai": "3.5.0",
     "istanbul": "0.4.5",
-    "mocha": "3.4.1",
+    "mocha": "3.5.0",
     "sinon": "2.2.0"
   }
 }

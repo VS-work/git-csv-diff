@@ -25,12 +25,12 @@ diffRowChange.prototype.process = function (baseStream, metaData, modelResponse,
   const primaryKey = _.first(primaryKeys);
   const primaryKeyIndex = diffResultColumns.indexOf(primaryKey);
 
-  const isDataPointsFile = diffHelpers.isDatapointFile(metaData);
+  const isDataPointsFile = diffHelpers.isDatapointFile(modelResponse.metadata, metaData);
   const isTranslations = diffHelpers.isLanguageFile(metaData.fileName);
 
   rowValue.forEach(function (valueCell, indexCell) {
 
-    const modificationSeparatorPosition = valueCell.indexOf('->');
+    const modificationSeparatorPosition = typeof valueCell === 'undefined' ? -1 : valueCell.indexOf('->');
     const columnValue = diffResultColumns[indexCell];
 
     // cell modified
