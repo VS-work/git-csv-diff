@@ -8,17 +8,17 @@ function diffHelpers() {
 }
 /* API */
 
-diffHelpers.prototype.getPrimaryKeys = function (metadata) {
+diffHelpers.prototype.getPrimaryKeys = function (metadataModel) {
   // detect schema from `old` file if it was removed and not exists in `new`
-  const schemaSource = metadata.file.new ? metadata.file.new : metadata.file.old;
-  const primaryKeyRaw = _.clone(schemaSource.schema.primaryKey);
+  const schemaSource = metadataModel.file.new ? metadataModel.file.new : metadataModel.file.old;
+  const primaryKeyRaw = _.clone(_.get(schemaSource, 'schema.primaryKey', null));
 
   return _.isString(primaryKeyRaw) ? [primaryKeyRaw] : primaryKeyRaw;
 };
 
 
 diffHelpers.prototype.isDatapointFile = function (metadata) {
-  const fileName = this.isLanguageFile(metadata.fileName) ? _.last(_.split(metadata.fileName, '/')) : metadata.fileName;
+  const fileName = this.getOriginalFileName(metadata.fileName, metadata.lang);
 
   const primaryKeyByPath = _.get(metadata, 'primaryKeyByPath');
   const newPrimaryKey = _.get(primaryKeyByPath, ['new', fileName]);
@@ -26,6 +26,12 @@ diffHelpers.prototype.isDatapointFile = function (metadata) {
 
   const primaryKey = newPrimaryKey || oldPrimaryKey;
   return _.isArray(primaryKey) && primaryKey.length > 1;
+};
+
+diffHelpers.prototype.getOriginalFileName = function (fileName, lang) {
+  if (this.isLanguageFile(fileName))
+    return _.replace(fileName, `lang/${lang}/`, '');
+  return fileName;
 };
 
 diffHelpers.prototype.isLanguageFile = function (filename) {

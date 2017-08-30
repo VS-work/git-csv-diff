@@ -9,10 +9,10 @@ describe("Unit Test || diff/helpers.js", function () {
 
     it("should return correct Primary Key when metadata contain new metadata", function (done) {
 
-      const metadata = {file: {new: {schema: {primaryKey: ['pk1']}}}};
+      const metadataModel = {file: {new: {schema: {primaryKey: ['pk1']}}}};
       const resultFixture = ['pk1'];
 
-      const result = testFile.getPrimaryKeys(metadata);
+      const result = testFile.getPrimaryKeys(metadataModel);
       expect(result).to.deep.equal(resultFixture);
 
       done();
@@ -20,10 +20,10 @@ describe("Unit Test || diff/helpers.js", function () {
 
     it("should return correct Primary Key when metadata contain old metadata", function (done) {
 
-      const metadata = {file: {old: {schema: {primaryKey: ['pk1']}}}};
+      const metadataModel = {file: {old: {schema: {primaryKey: ['pk1']}}}};
       const resultFixture = ['pk1'];
 
-      const result = testFile.getPrimaryKeys(metadata);
+      const result = testFile.getPrimaryKeys(metadataModel);
       expect(result).to.deep.equal(resultFixture);
 
       done();
@@ -31,10 +31,10 @@ describe("Unit Test || diff/helpers.js", function () {
 
     it("should return correct Primary Key when metadata contain old and new metadata", function (done) {
 
-      const metadata = {file: {old: {schema: {primaryKey: ['pk1']}}, new: {schema: {primaryKey: ['pk2']}}}};
+      const metadataModel = {file: {old: {schema: {primaryKey: ['pk1']}}, new: {schema: {primaryKey: ['pk2']}}}};
       const resultFixture = ['pk2'];
 
-      const result = testFile.getPrimaryKeys(metadata);
+      const result = testFile.getPrimaryKeys(metadataModel);
       expect(result).to.deep.equal(resultFixture);
 
       done();
@@ -42,10 +42,10 @@ describe("Unit Test || diff/helpers.js", function () {
 
     it("should return correct Primary Key when metadata contain new metadata in string format", function (done) {
 
-      const metadata = {file: {new: {schema: {primaryKey: 'pk1'}}}};
+      const metadataModel = {file: {new: {schema: {primaryKey: 'pk1'}}}};
       const resultFixture = ['pk1'];
 
-      const result = testFile.getPrimaryKeys(metadata);
+      const result = testFile.getPrimaryKeys(metadataModel);
       expect(result).to.deep.equal(resultFixture);
 
       done();
@@ -53,10 +53,10 @@ describe("Unit Test || diff/helpers.js", function () {
 
     it("should return correct Primary Key when metadata contain old metadata in string format", function (done) {
 
-      const metadata = {file: {old: {schema: {primaryKey: 'pk1'}}}};
+      const metadataModel = {file: {old: {schema: {primaryKey: 'pk1'}}}};
       const resultFixture = ['pk1'];
 
-      const result = testFile.getPrimaryKeys(metadata);
+      const result = testFile.getPrimaryKeys(metadataModel);
       expect(result).to.deep.equal(resultFixture);
 
       done();
@@ -64,10 +64,10 @@ describe("Unit Test || diff/helpers.js", function () {
 
     it("should return correct Primary Key when metadata contain old and new metadata", function (done) {
 
-      const metadata = {file: {old: {schema: {primaryKey: 'pk1'}}, new: {schema: {primaryKey: 'pk2'}}}};
+      const metadataModel = {file: {old: {schema: {primaryKey: 'pk1'}}, new: {schema: {primaryKey: 'pk2'}}}};
       const resultFixture = ['pk2'];
 
-      const result = testFile.getPrimaryKeys(metadata);
+      const result = testFile.getPrimaryKeys(metadataModel);
       expect(result).to.deep.equal(resultFixture);
 
       done();
@@ -83,7 +83,8 @@ describe("Unit Test || diff/helpers.js", function () {
           new: {
             'ddf--datapoints--lines_of_code--by--company--project--anno.csv': ['company', 'project', 'anno']
           }
-        }
+        },
+        lang: 'default'
       };
 
       expect(testFile.isDatapointFile(metadata)).to.equal(true);
@@ -125,7 +126,8 @@ describe("Unit Test || diff/helpers.js", function () {
           new: {
             'ddf--datapoints--lines_of_code--by--company--project--anno.csv': ['company', 'project', 'anno']
           }
-        }
+        },
+        lang: 'path'
       };
 
       expect(testFile.isDatapointFile(metadata)).to.equal(true);
