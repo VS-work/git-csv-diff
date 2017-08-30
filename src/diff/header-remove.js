@@ -22,7 +22,7 @@ diffHeaderRemove.prototype.process = function (baseStream, metaData, modelRespon
   const primaryKeyIndex = diffResultColumns.indexOf(primaryKey);
 
   const isTranslations = diffHelpers.isLanguageFile(metaData.fileName);
-  const isDataPointsFile = diffHelpers.isDatapointFile(modelResponse.metadata, metaData);
+  const isDataPointsFile = diffHelpers.isDatapointFile({lang: modelResponse.metadata.lang, fileName: metaData.fileName, primaryKeyByPath: metaData.primaryKeyByPath});
 
   if(isDataPointsFile && isTranslations) {
 

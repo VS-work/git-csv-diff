@@ -1,5 +1,6 @@
 const expect = require("chai").expect;
 const sinon = require("sinon");
+const _ = require("lodash");
 
 const testFile = require("../../src/diff/header-remove");
 
@@ -37,7 +38,7 @@ describe("Unit Test || diff/header-remove.js", function () {
         },
       },
       file: {old: {schema: {primaryKey: 'column 1'}}, new: {schema: {primaryKey: 'column 2'}}},
-      fileName: '/lang/nl-nl/ddf--datapoints--lines.csv'
+      fileName: 'lang/nl-nl/ddf--datapoints--lines.csv'
     };
     const modelDiff = ModelDiff.init();
     const diffResultColumns = ['column 1', 'column 2', 'column 3'];
@@ -64,10 +65,11 @@ describe("Unit Test || diff/header-remove.js", function () {
     it("should generate correct response model for datapoint and translation file", function (done) {
 
       const diffHelpersStub = sinon.stub(diffHelpers, "writeToStream");
-
+      const metadata = _.defaults({lang: 'nl-nl'}, metaDataDatapoint);
       const modelResponse = ModelResponse.init();
       modelResponse.metadata.file.new = metaDataDatapoint.file.new;
       modelResponse.metadata.file.old = metaDataDatapoint.file.old;
+      modelResponse.metadata.lang = metadata.lang;
 
       const resultFixture = {
         "metadata": {
@@ -84,7 +86,7 @@ describe("Unit Test || diff/header-remove.js", function () {
               }
             }
           },
-          "lang": null,
+          "lang": metadata.lang,
           "onlyColumnsRemoved": true,
           "removedColumns": [],
           "type": null
@@ -103,7 +105,7 @@ describe("Unit Test || diff/header-remove.js", function () {
         }
       };
 
-      testFile.process(baseStream, metaDataDatapoint, modelResponse, modelDiff, diffResultColumns, rowValue);
+      testFile.process(baseStream, metadata, modelResponse, modelDiff, diffResultColumns, rowValue);
       sinon.assert.calledOnce(diffHelpersStub);
       expect(diffHelpersStub.getCall(0).args[1]).to.deep.equal(resultFixture);
 

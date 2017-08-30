@@ -47,14 +47,12 @@ function _process(metadata, dataDiff, streams) {
   // setup response meta data - DON'T CHANGE THE ORDER
   setMetaDataLanguage(modelResponse.metadata, metadata);
   setMetaDataFile(modelResponse.metadata, metadata);
-  setMetaDataType(modelResponse.metadata, metadata);
-
   // validate input data
-
   if (!isSchemaExists(modelResponse.metadata)) {
     console.error('Given schema doesn\'t exist!', JSON.stringify(modelResponse.metadata, null, '\t'));
-    throw new Error(`Given schema doesn\'t exist!\n${JSON.stringify(modelResponse.metadata, null, '\t')}`);
+    return;
   }
+  setMetaDataType(modelResponse.metadata);
 
   /* Process Diff by Daff */
 
@@ -124,12 +122,12 @@ function setMetaDataLanguage(metadataModel, metadata) {
 function setMetaDataFile(metadataModel, metadata) {
   const fileName = diffHelpers.getOriginalFileName(metadata.fileName, metadataModel.lang);
   const resourcesByPathOld = _.keyBy(metadata.datapackage.old.resources, 'path');
-  metadataModel.file.old = resourcesByPathOld[fileName];
+  metadataModel.file.old = _.get(resourcesByPathOld, fileName);
 
   // info is not available if file was removed
   if (metadata.fileModifier != "D") {
     const resourcesByPathNew = _.keyBy(metadata.datapackage.new.resources, 'path');
-    metadataModel.file.new = resourcesByPathNew[fileName];
+    metadataModel.file.new = _.get(resourcesByPathNew, fileName, {});
   }
 }
 
@@ -138,7 +136,7 @@ function isSchemaExists(metadata) {
   return schemaSource && schemaSource.hasOwnProperty('schema');
 }
 
-function setMetaDataType(metadataModel, metadata) {
+function setMetaDataType(metadataModel) {
   const constants = {
     DATAPOINTS: 'datapoints',
     CONCEPTS: 'concepts',

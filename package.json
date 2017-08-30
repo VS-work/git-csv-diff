@@ -31,7 +31,6 @@
     "lodash": "4.17.4"
   },
   "devDependencies": {
-    "async": "2.5.0",
     "byline": "5.0.0",
     "chai": "3.5.0",
     "istanbul": "0.4.5",
